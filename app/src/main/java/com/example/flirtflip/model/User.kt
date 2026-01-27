@@ -1,7 +1,7 @@
 package com.example.flirtflip.model
 
 data class User(
-    val id: Int = 0,
+    val id: String = "",
     val name: String = "",
     val firstSurname: String = "",
     val secondSurname: String = "",
@@ -9,7 +9,5 @@ data class User(
     val age: Int = 18,
     //'M' = Masculino, 'F' = Femenino, 'U' = Undefined
     val gender: Char = 'U',
-    val bio: String = "",
-    val hobbies: List<String> = emptyList(),
-    val profilePhoto: String = ""
+    val profile: Profile = Profile()
 )
