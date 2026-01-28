@@ -6,5 +6,5 @@ data class Chat(
     val userBId: String = "",
     val lastMessage: String = "", //Texto o Foto Dependiendo
     val lastTimestamp: Long = System.currentTimeMillis(),
-    val unreadCount: Int = 0 
+    val unreadCount: Int = 0
 )
