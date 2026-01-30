@@ -56,7 +56,7 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.weight(1f))
 
-            // Logo animado
+            // Logo animado (Volvemos al diseño original con el emoji)
             Box(
                 modifier = Modifier
                     .scale(scale)
@@ -164,13 +164,5 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
         }
-    }
-}
-
-// Preview
-@Composable
-fun LoginScreenPreview() {
-    MaterialTheme {
-        LoginScreen()
     }
 }

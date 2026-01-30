@@ -1,5 +1,6 @@
 package com.example.flirtflip.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,12 +17,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,85 +38,48 @@ fun SignUpScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
-    var acceptedTerms by remember { mutableStateOf(false) }
+    var acceptedTerms by remember { mutableStateOf(false) } // <--- Estado de los términos
 
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFFF6B9D),
-                        Color(0xFFFF8FB3),
-                        Color(0xFFFFC2D4)
-                    )
-                )
+        modifier = Modifier.fillMaxSize().background(
+            brush = Brush.verticalGradient(
+                colors = listOf(Color(0xFFFF6B9D), Color(0xFFFF8FB3), Color(0xFFFFC2D4))
             )
+        )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 32.dp),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(80.dp))
-
-            // Título
-            Text(
-                text = "Crear Cuenta",
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Únete a FlirtFlip hoy",
-                fontSize = 16.sp,
-                color = Color.White.copy(alpha = 0.9f)
-            )
-
+            Spacer(modifier = Modifier.height(60.dp))
+            Text(text = "Crear Cuenta", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Campo de Nombre
+            // Campo Nombre
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nombre completo") },
+                label = { Text("Nombre") },
                 modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedBorderColor = Color(0xFFFF6B9D),
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = Color(0xFFFF6B9D),
-                    unfocusedLabelColor = Color(0xFFFF6B9D).copy(alpha = 0.6f)
-                ),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de Email
+            // Campo Email
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedBorderColor = Color(0xFFFF6B9D),
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = Color(0xFFFF6B9D),
-                    unfocusedLabelColor = Color(0xFFFF6B9D).copy(alpha = 0.6f)
-                ),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 singleLine = true
@@ -120,219 +87,117 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de Contraseña
+            // Campo Contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedBorderColor = Color(0xFFFF6B9D),
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = Color(0xFFFF6B9D),
-                    unfocusedLabelColor = Color(0xFFFF6B9D).copy(alpha = 0.6f)
-                ),
-                shape = RoundedCornerShape(16.dp),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
-                            tint = Color(0xFFFF6B9D)
-                        )
+                        Icon(imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff, contentDescription = null)
                     }
                 },
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de Confirmar Contraseña
+            // Campo Confirmar Contraseña
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
-                label = { Text("Confirmar contraseña") },
+                label = { Text("Confirmar Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedBorderColor = Color(0xFFFF6B9D),
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = Color(0xFFFF6B9D),
-                    unfocusedLabelColor = Color(0xFFFF6B9D).copy(alpha = 0.6f)
-                ),
+                visualTransformation = PasswordVisualTransformation(),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
-                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                trailingIcon = {
-                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                        Icon(
-                            imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (confirmPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña",
-                            tint = Color(0xFFFF6B9D)
-                        )
-                    }
-                },
-                singleLine = true,
-                isError = confirmPassword.isNotEmpty() && password != confirmPassword
+                singleLine = true
             )
 
-            if (confirmPassword.isNotEmpty() && password != confirmPassword) {
-                Text(
-                    text = "Las contraseñas no coinciden",
-                    color = Color(0xFFD32F2F),
-                    fontSize = 12.sp,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(start = 16.dp, top = 4.dp)
-                )
-            }
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Checkbox de términos y condiciones
+            // FILA DE TÉRMINOS Y CONDICIONES
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Checkbox(
                     checked = acceptedTerms,
                     onCheckedChange = { acceptedTerms = it },
                     colors = CheckboxDefaults.colors(
                         checkedColor = Color.White,
-                        uncheckedColor = Color.White,
-                        checkmarkColor = Color(0xFFFF6B9D)
+                        checkmarkColor = Color(0xFFFF6B9D),
+                        uncheckedColor = Color.White
                     )
                 )
                 Text(
                     text = "Acepto los Términos y Condiciones y la Política de Privacidad",
-                    fontSize = 13.sp,
                     color = Color.White,
-                    lineHeight = 18.sp,
-                    modifier = Modifier.padding(start = 8.dp)
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón de Crear Cuenta
+            // BOTÓN REGISTRARSE (Se habilita solo si acceptedTerms es true)
             Button(
-                onClick = onSignUpSuccess,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                onClick = {
+                    if (password != confirmPassword) {
+                        Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+                    } else {
+                        auth.createUserWithEmailAndPassword(email.trim(), password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val userId = auth.currentUser?.uid
+                                    val userData = hashMapOf(
+                                        "name" to name,
+                                        "email" to email.trim(),
+                                        "uid" to userId,
+                                        "createdAt" to System.currentTimeMillis()
+                                    )
+
+                                    if (userId != null) {
+                                        db.collection("users").document(userId)
+                                            .set(userData)
+                                            .addOnSuccessListener {
+                                                onSignUpSuccess()
+                                            }
+                                            .addOnFailureListener { e ->
+                                                Toast.makeText(context, "Error en Firestore: ${e.message}", Toast.LENGTH_SHORT).show()
+                                            }
+                                    }
+                                } else {
+                                    Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                // El botón solo funciona si los campos están llenos Y los términos aceptados
+                enabled = acceptedTerms && name.isNotBlank() && email.isNotBlank() && password.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
-                    contentColor = Color(0xFFFF6B9D)
-                ),
-                shape = RoundedCornerShape(16.dp),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 8.dp,
-                    pressedElevation = 12.dp
-                ),
-                enabled = acceptedTerms && 
-                         name.isNotEmpty() && 
-                         email.isNotEmpty() && 
-                         password.isNotEmpty() && 
-                         password == confirmPassword
-            ) {
-                Text(
-                    text = "Crear Cuenta",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Divider con texto
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Divider(
-                    modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.5f),
-                    thickness = 1.dp
-                )
-                Text(
-                    text = "O regístrate con",
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-                Divider(
-                    modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.5f),
-                    thickness = 1.dp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Botones de registro social
-            OutlinedButton(
-                onClick = { /* TODO: Implementar registro con Google */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF424242)
+                    contentColor = Color(0xFFFF6B9D),
+                    disabledContainerColor = Color.White.copy(alpha = 0.5f),
+                    disabledContentColor = Color.Gray
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text(
-                    text = "🔍 Continuar con Google",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Text(text = "Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedButton(
-                onClick = { /* TODO: Implementar registro con Facebook */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF1877F2)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = "📘 Continuar con Facebook",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(40.dp))
         }
-        
-        // Botón de retroceso - colocado después del Column para que esté encima
-        Surface(
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.TopStart),
-            color = Color.White.copy(alpha = 0.3f),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            IconButton(
-                onClick = onBackClick
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Volver",
-                    tint = Color.White
-                )
-            }
+
+        IconButton(onClick = onBackClick, modifier = Modifier.padding(16.dp).align(Alignment.TopStart)) {
+            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
         }
     }
 }

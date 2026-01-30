@@ -10,13 +10,15 @@ import androidx.navigation.compose.rememberNavController
 import com.example.flirtflip.ui.screens.LoginFormScreen
 import com.example.flirtflip.ui.screens.LoginScreen
 import com.example.flirtflip.ui.screens.SignUpScreen
+import com.example.flirtflip.ui.screens.CompleteProfileScreen // Importa tu nueva pantalla
 
-// Definición de rutas
+// 1. Definición de rutas actualizada
 sealed class Screen(val route: String) {
     object Welcome : Screen("welcome")
     object Login : Screen("login")
     object SignUp : Screen("signup")
-    object Home : Screen("home") // Esta será tu pantalla principal después del login
+    object CompleteProfile : Screen("complete_profile") // Nueva ruta
+    object Home : Screen("home")
 }
 
 @Composable
@@ -27,29 +29,21 @@ fun AppNavigation() {
         navController = navController,
         startDestination = Screen.Welcome.route
     ) {
-        // Pantalla de bienvenida (pantalla inicial)
+        // Pantalla de bienvenida
         composable(Screen.Welcome.route) {
             LoginScreen(
-                onLoginClick = {
-                    navController.navigate(Screen.Login.route)
-                },
-                onSignUpClick = {
-                    navController.navigate(Screen.SignUp.route)
-                }
+                onLoginClick = { navController.navigate(Screen.Login.route) },
+                onSignUpClick = { navController.navigate(Screen.SignUp.route) }
             )
         }
 
         // Pantalla de inicio de sesión
         composable(Screen.Login.route) {
             LoginFormScreen(
-                onBackClick = {
-                    navController.popBackStack()
-                },
+                onBackClick = { navController.popBackStack() },
                 onLoginSuccess = {
-                    // TODO: Verificar credenciales
-                    // Navegar a la pantalla principal
-                    navController.navigate(Screen.Home.route) {
-                        // Limpiar el back stack para que no pueda volver al login
+                    // Ahora redirigimos a completar perfil antes del Home
+                    navController.navigate(Screen.CompleteProfile.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
                 }
@@ -59,24 +53,30 @@ fun AppNavigation() {
         // Pantalla de registro
         composable(Screen.SignUp.route) {
             SignUpScreen(
-                onBackClick = {
-                    navController.popBackStack()
-                },
+                onBackClick = { navController.popBackStack() },
                 onSignUpSuccess = {
-                    // TODO: Crear usuario
-                    // Navegar a la pantalla principal
-                    navController.navigate(Screen.Home.route) {
-                        // Limpiar el back stack para que no pueda volver al registro
+                    // Ahora redirigimos a completar perfil antes del Home
+                    navController.navigate(Screen.CompleteProfile.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
                 }
             )
         }
 
-        // Pantalla principal (implementar tu contenido aquí)
+        // 2. NUEVA Pantalla: Completar Perfil
+        composable(Screen.CompleteProfile.route) {
+            CompleteProfileScreen(
+                onCompleteSuccess = {
+                    // Una vez completado, ahora sí vamos al Home
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.CompleteProfile.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Pantalla principal
         composable(Screen.Home.route) {
-            // TODO: Implementar la pantalla principal de la app
-            // Por ahora, una pantalla temporal
             HomeScreenPlaceholder()
         }
     }
@@ -89,7 +89,7 @@ fun HomeScreenPlaceholder() {
         contentAlignment = androidx.compose.ui.Alignment.Center
     ) {
         androidx.compose.material3.Text(
-            text = "¡Bienvenido a FlirtFlip! 💘\n\nAquí irá tu pantalla principal",
+            text = "¡Perfil Completado! 💘\n\nBienvenido al Home de FlirtFlip",
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             fontSize = 20.sp
         )

@@ -56,6 +56,7 @@ android {
 }
 
 dependencies {
+    implementation("io.coil-kt:coil-compose:2.5.0")
     // --- CORE Y UI BASE ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
