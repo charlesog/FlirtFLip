@@ -10,14 +10,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.flirtflip.ui.screens.LoginFormScreen
 import com.example.flirtflip.ui.screens.LoginScreen
 import com.example.flirtflip.ui.screens.SignUpScreen
-import com.example.flirtflip.ui.screens.CompleteProfileScreen // Importa tu nueva pantalla
+import com.example.flirtflip.ui.screens.CompleteProfileScreen
 
-// 1. Definición de rutas actualizada
+// 1. Definición de rutas
 sealed class Screen(val route: String) {
     object Welcome : Screen("welcome")
     object Login : Screen("login")
     object SignUp : Screen("signup")
-    object CompleteProfile : Screen("complete_profile") // Nueva ruta
+    object CompleteProfile : Screen("complete_profile")
     object Home : Screen("home")
 }
 
@@ -42,7 +42,6 @@ fun AppNavigation() {
             LoginFormScreen(
                 onBackClick = { navController.popBackStack() },
                 onLoginSuccess = {
-                    // Ahora redirigimos a completar perfil antes del Home
                     navController.navigate(Screen.CompleteProfile.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
@@ -55,7 +54,6 @@ fun AppNavigation() {
             SignUpScreen(
                 onBackClick = { navController.popBackStack() },
                 onSignUpSuccess = {
-                    // Ahora redirigimos a completar perfil antes del Home
                     navController.navigate(Screen.CompleteProfile.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
@@ -63,11 +61,12 @@ fun AppNavigation() {
             )
         }
 
-        // 2. NUEVA Pantalla: Completar Perfil
+        // --- CORRECCIÓN AQUÍ ---
         composable(Screen.CompleteProfile.route) {
             CompleteProfileScreen(
+                // PASAMOS LA FUNCIÓN PARA QUE EL BOTÓN FUNCIONE:
+                onBackClick = { navController.popBackStack() },
                 onCompleteSuccess = {
-                    // Una vez completado, ahora sí vamos al Home
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.CompleteProfile.route) { inclusive = true }
                     }
