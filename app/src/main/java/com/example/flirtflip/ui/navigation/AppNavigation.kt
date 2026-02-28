@@ -12,7 +12,6 @@ import com.example.flirtflip.ui.screens.LoginScreen
 import com.example.flirtflip.ui.screens.SignUpScreen
 import com.example.flirtflip.ui.screens.CompleteProfileScreen
 
-// 1. Definición de rutas
 sealed class Screen(val route: String) {
     object Welcome : Screen("welcome")
     object Login : Screen("login")
@@ -42,9 +41,8 @@ fun AppNavigation() {
             LoginFormScreen(
                 onBackClick = { navController.popBackStack() },
                 onLoginSuccess = {
-                    navController.navigate(Screen.CompleteProfile.route) {
-                        popUpTo(Screen.Welcome.route) { inclusive = true }
-                    }
+                    // Quitamos el popUpTo de aquí para permitir volver atrás si es necesario
+                    navController.navigate(Screen.CompleteProfile.route)
                 }
             )
         }
@@ -54,21 +52,21 @@ fun AppNavigation() {
             SignUpScreen(
                 onBackClick = { navController.popBackStack() },
                 onSignUpSuccess = {
-                    navController.navigate(Screen.CompleteProfile.route) {
-                        popUpTo(Screen.Welcome.route) { inclusive = true }
-                    }
+                    // Quitamos el popUpTo de aquí también para mantener la pila
+                    navController.navigate(Screen.CompleteProfile.route)
                 }
             )
         }
 
-        // --- CORRECCIÓN AQUÍ ---
+        // Pantalla: Completar Perfil
         composable(Screen.CompleteProfile.route) {
             CompleteProfileScreen(
-                // PASAMOS LA FUNCIÓN PARA QUE EL BOTÓN FUNCIONE:
+                // Ahora popBackStack funcionará porque hay pantallas debajo en la pila
                 onBackClick = { navController.popBackStack() },
                 onCompleteSuccess = {
+                    // Al terminar con éxito, aquí sí limpiamos TODO para ir al Home
                     navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.CompleteProfile.route) { inclusive = true }
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
                 }
             )

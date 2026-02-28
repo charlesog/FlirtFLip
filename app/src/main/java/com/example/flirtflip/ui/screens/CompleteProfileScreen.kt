@@ -145,7 +145,9 @@ fun CompleteProfileScreen(
             // Botón Finalizar
             Button(
                 onClick = {
-                    val userId = auth.currentUser?.uid
+                    val user = auth.currentUser
+                    val userId = user?.uid
+
                     if (userId != null && isAdult) {
                         val updates = hashMapOf(
                             "age" to ageInt,
@@ -154,7 +156,17 @@ fun CompleteProfileScreen(
                         )
                         db.collection("users").document(userId)
                             .update(updates as Map<String, Any>)
-                            .addOnSuccessListener { onCompleteSuccess() }
+                            .addOnSuccessListener {
+                                user.sendEmailVerification()
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful){
+                                            Toast.makeText(context, "Email de verificación enviado", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(context, "Error al enviar el email", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                //HOME
+                                onCompleteSuccess() }
                             .addOnFailureListener {
                                 Toast.makeText(context, "Error al guardar datos", Toast.LENGTH_SHORT).show()
                             }
