@@ -33,6 +33,14 @@ fun LoginFormScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    // Validación de email
+    val isEmailValid = remember(email) {
+        android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    // Validación completa del formulario
+    val isFormValid = email.isNotEmpty() && password.isNotEmpty() && isEmailValid
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -89,8 +97,21 @@ fun LoginFormScreen(
                 ),
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                singleLine = true
+                singleLine = true,
+                isError = email.isNotEmpty() && !isEmailValid
             )
+
+            // Mensaje de error para email
+            if (email.isNotEmpty() && !isEmailValid) {
+                Text(
+                    text = "Por favor, introduce un email válido",
+                    color = Color(0xFFD32F2F),
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(start = 16.dp, top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -146,13 +167,16 @@ fun LoginFormScreen(
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
-                    contentColor = Color(0xFFFF6B9D)
+                    contentColor = Color(0xFFFF6B9D),
+                    disabledContainerColor = Color.White.copy(alpha = 0.6f),
+                    disabledContentColor = Color(0xFFFF6B9D).copy(alpha = 0.6f)
                 ),
                 shape = RoundedCornerShape(16.dp),
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 8.dp,
                     pressedElevation = 12.dp
-                )
+                ),
+                enabled = isFormValid
             ) {
                 Text(
                     text = "Iniciar Sesión",
@@ -229,7 +253,7 @@ fun LoginFormScreen(
 
             Spacer(modifier = Modifier.weight(1f))
         }
-        
+
         // Botón de retroceso - colocado después del Column para que esté encima
         Surface(
             modifier = Modifier
