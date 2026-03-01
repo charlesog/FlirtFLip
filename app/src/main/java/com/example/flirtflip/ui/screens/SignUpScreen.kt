@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,10 +35,18 @@ fun SignUpScreen(
     onSignUpSuccess: () -> Unit = {}
 ) {
     var name by remember { mutableStateOf("") }
+    var firstSurname by remember { mutableStateOf("") }
+    var secondSurname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
+
+    var gender by remember { mutableStateOf("") }
+
+    var selectedGender by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
     var acceptedTerms by remember { mutableStateOf(false) } // <--- Estado de los términos
 
     val auth = FirebaseAuth.getInstance()
@@ -48,32 +57,60 @@ fun SignUpScreen(
     Box(
         modifier = Modifier.fillMaxSize().background(
             brush = Brush.verticalGradient(
-                colors = listOf(Color(0xFFFF6B9D), Color(0xFFFF8FB3), Color(0xFFFFC2D4))
+                colors = listOf(Color(0xFFFF6B9D),
+                    Color(0xFFFF8FB3), Color(0xFFFFC2D4))
             )
         )
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(horizontal = 32.dp),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
+                .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(60.dp))
-            Text(text = "Crear Cuenta", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(text = "Crear Cuenta", fontSize = 36.sp, fontWeight = FontWeight.Bold,
+                color = Color.White)
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Campo Nombre
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Nombre") },
                 modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Email
+            OutlinedTextField(
+                value = firstSurname,
+                onValueChange = { firstSurname = it},
+                label = { Text("Primer Apellido") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = secondSurname,
+                onValueChange = { secondSurname = it},
+                label = { Text("Segundo Apellido") },
+                modifier = Modifier.fillMaxSize(),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -87,19 +124,23 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff, contentDescription = null)
+                        Icon(imageVector = if (passwordVisible) Icons.Filled.Visibility
+                        else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Ocultar contraseña"
+                            else "Mostrar contraseña", tint = Color(0xFFFF6B9D))
                     }
                 },
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true
@@ -107,22 +148,96 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Confirmar Contraseña
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text("Confirmar Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = age,
+                onValueChange = {
+                    if (it.all { char -> char.isDigit() } && it.length <= 2) { age = it }
+                                },
+                label = { Text("Edad") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                isError = age.isNotEmpty() && (age.toIntOrNull() ?: 0 ) < 18,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
+            )
+
+            LaunchedEffect(age) {
+                if (age.isNotEmpty() && (age.toIntOrNull() ?: 0) < 18) {
+                    delay(2000)
+                    Toast.makeText(
+                        context, "Debes ser mayor de 18 años para usar FlirtFlip",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Selecciona tu Género",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp) // Es mejor 'spacedBy' para que no se peguen a los bordes
+                ) {
+                    val options = listOf("Hombre", "Mujer", "Otro")
+
+                    options.forEach { option ->
+                        val isSelected = selectedGender == option
+
+                        Button(
+                            onClick = {
+                                selectedGender = option
+                                gender = option[0].toString()
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isSelected) Color(0xFFFF5A60) else Color(0xFFF0F0F0),
+                                contentColor = if (isSelected) Color.White else Color.DarkGray
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                        ) {
+                            Text(
+                                text = option,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
 
-            // FILA DE TÉRMINOS Y CONDICIONES
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
