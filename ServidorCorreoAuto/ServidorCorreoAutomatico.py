@@ -13,7 +13,7 @@ db = firestore.client()
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SENDER_EMAIL = "procesoscharles@gmail.com"
-SENDER_PASSWORD = "norn ygws rgab tnbx" # No es tu clave normal, es la de 16 letras de Google
+SENDER_PASSWORD = "norn ygws rgab tnbx" 
 
 def enviar_correo(destinatario, nombre_usuario):
     try:
@@ -34,20 +34,15 @@ def enviar_correo(destinatario, nombre_usuario):
     except Exception as e:
         print(f"❌ Error al enviar correo: {e}")
 
-# 3. "Vigilante" de Firestore (Ajustado a tus capturas)
 def on_snapshot(col_snapshot, changes, read_time):
     for change in changes:
-        # Usamos ADDED o MODIFIED para asegurar que pesque el nombre 
-        # si se rellena justo después de crear la cuenta
         if change.type.name == 'ADDED' or change.type.name == 'MODIFIED':
             datos = change.document.to_dict()
             
-            # Extraemos los campos exactos de tu imagen
             email_usuario = datos.get('email')
-            nombre_real = datos.get('name') # 'name' es el campo de tu captura
+            nombre_real = datos.get('name') 
             es_completo = datos.get('profileComplete', False)
             
-            # Solo enviamos el correo si tenemos el email Y el nombre ya existe
             if email_usuario and nombre_real:
                 print(f"🔔 Procesando usuario: {nombre_real} ({email_usuario})")
                 enviar_correo(email_usuario, nombre_real)
@@ -58,4 +53,4 @@ query_watch = col_query.on_snapshot(on_snapshot)
 
 print("🚀 Vigilante de FlirtFlip activado... Esperando nuevos registros.")
 while True:
-    pass # Mantiene el script corriendo
+    pass 

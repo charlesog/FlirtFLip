@@ -31,17 +31,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun CompleteProfileScreen(
-    onBackClick: () -> Unit = {}, // Función que se ejecuta al pulsar volver
+    onBackClick: () -> Unit = {}, 
     onCompleteSuccess: () -> Unit = {}
 ) {
     var bio by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var gender by remember { mutableStateOf("") }
 
-    val ageInt = age.toIntOrNull() ?: 0
-    val isAdult = ageInt >= 18
-    val isAgeEmpty = age.isEmpty()
-    val showError = !isAgeEmpty && !isAdult
+    var selectedGender by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val db = FirebaseFirestore.getInstance()
@@ -62,7 +60,6 @@ fun CompleteProfileScreen(
                 .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Espacio extra para que el botón de volver no tape el título
             Spacer(modifier = Modifier.height(48.dp))
 
             Text("Casi listo...", fontSize = 32.sp, color = Color.White, fontWeight = FontWeight.Bold)
@@ -92,53 +89,100 @@ fun CompleteProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-
-            // Campo Edad
-            OutlinedTextField(
-                value = age,
-                onValueChange = {
-                    if (it.all { char -> char.isDigit() } && it.length <= 2) {
-                        age = it
-                    }
-                },
-                label = { Text("Edad") },
-                placeholder = { Text("Mínimo 18 años") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                isError = showError,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    errorContainerColor = Color.White
-                )
-            )
-
-            if (showError) {
-                Text(
-                    text = "Debes ser mayor de 18 para usar FlirtFlip",
-                    color = Color.Yellow,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo Bio
+            
+            // Campo información sobre mi 
             OutlinedTextField(
                 value = bio,
                 onValueChange = { bio = it },
-                label = { Text("Biografía") },
+                label = { Text("Sobre mí") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White
                 )
             )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Verificación y campo edad con teclado numerico 
+            OutlinedTextField(
+                value = age,
+                onValueChange = {
+                    if (it.all { char -> char.isDigit() } && it.length <= 2) { age = it }
+                },
+                label = { Text("Edad") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                isError = age.isNotEmpty() && (age.toIntOrNull() ?: 0 ) < 18,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
+                )
+                
+                LaunchedEffect(age) {
+                    if (age.isNotEmpty() && (age.toIntOrNull() ?: 0) < 18) {
+                        delay(2000)
+                        Toast.makeText(
+                            context, "Debes ser mayor de 18 años para usar FlirtFlip",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+
+
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Selecciona tu Género",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp) 
+                ) {
+                    val options = listOf("Hombre", "Mujer", "Otro")
+
+                    options.forEach { option ->
+                        val isSelected = selectedGender == option
+
+                        Button(
+                            onClick = {
+                                selectedGender = option
+                                gender = option[0].toString()
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isSelected) Color(0xFFFF5A60) else Color(0xFFF0F0F0),
+                                contentColor = if (isSelected) Color.White else Color.DarkGray
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                        ) {
+                            Text(
+                                text = option,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -150,8 +194,9 @@ fun CompleteProfileScreen(
 
                     if (userId != null && isAdult) {
                         val updates = hashMapOf(
-                            "age" to ageInt,
                             "bio" to bio,
+                            "age" to age,
+                            "gender" to gender,
                             "profileComplete" to true
                         )
                         db.collection("users").document(userId)
@@ -187,7 +232,6 @@ fun CompleteProfileScreen(
             }
         }
 
-        // --- BOTÓN DE VOLVER (Capas Superiores del Box) ---
         Surface(
             modifier = Modifier
                 .padding(16.dp)
