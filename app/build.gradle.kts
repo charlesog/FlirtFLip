@@ -2,8 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
-    // Plugin oficial de Compose para Kotlin 2.0+
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -34,19 +35,17 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 
     buildFeatures {
         compose = true
     }
-
-    // El bloque composeOptions YA NO ES NECESARIO en Kotlin 2.0.21
 
     packaging {
         resources {
@@ -56,65 +55,52 @@ android {
 }
 
 dependencies {
-    implementation("io.coil-kt:coil-compose:2.5.0")
-    // --- CORE Y UI BASE ---
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material) // IMPORTANTE: Corrige el error de Theme.Material3
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
+    // Seguridad y Localización
+    implementation("org.mindrot:jbcrypt:0.4")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3") // Para await() en GPS
 
-    // --- COMPOSE (Gestionado por el BoM de Compose) ---
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.51")
+    kapt("com.google.dagger:hilt-android-compiler:2.51")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // Compose BoM
     implementation(platform("androidx.compose:compose-bom:2024.10.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
 
-    // Librerías extra de Compose
+    // Ciclo de vida y Navegación
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.navigation:navigation-compose:2.8.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
 
-    // --- FIREBASE (Gestionado por el BoM de Firebase 34.8.0) ---
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Firebase BoM
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
 
-    // --- TESTING ---
+    // AndroidX Base
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.10.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
-    // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-    // Compose BOM (Bill of Materials)
-    implementation(platform("androidx.compose:compose-bom:2024.01.00"))
-
-    // Compose UI
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-
-    // Material 3
-    implementation("androidx.compose.material3:material3")
-
-    // Activity Compose
-    implementation("androidx.activity:activity-compose:1.8.2")
-
-    // Navigation Compose
-    implementation("androidx.navigation:navigation-compose:2.7.6")
-
-    // Icons Extended
-    implementation("androidx.compose.material:material-icons-extended")
-
-    // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-
 }

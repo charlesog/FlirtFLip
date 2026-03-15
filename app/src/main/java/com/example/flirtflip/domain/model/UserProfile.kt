@@ -9,5 +9,6 @@ data class UserProfile(
     val bio: String,
     val hobbies: List<Hobby>,
     val imageUrl: List<String>,
-    val job: String? = null
+    val job: String? = null,
+    val location: Location? = null
 )
