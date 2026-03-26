@@ -1,5 +1,8 @@
 package com.example.flirtflip.data.repository
 
+import com.example.flirtflip.data.entity.UserEntity
+import com.example.flirtflip.data.mapper.toDomain
+import com.example.flirtflip.data.mapper.toEntity
 import com.example.flirtflip.domain.model.AppError
 import com.example.flirtflip.domain.model.User
 import com.example.flirtflip.domain.model.UserProfile
@@ -11,7 +14,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class UserRepositoryImpl @Inject constructor(
+class FirebaseUserRepositoryImpl @Inject constructor(
     private val firestore : FirebaseFirestore
 ) : UserRepository{
 
@@ -20,7 +23,11 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getUser(id: String): User? {
         return try {
             val document = userCollection.document(id).get().await()
-            document.toObject(User::class.java)
+            if (document.exists()) {
+                val entity = document.toObject(UserEntity::class.java)
+                entity?.toDomain()
+            } else
+                null
         } catch (e: Exception) {
             throw AppError.UnknownError(e)
         }
@@ -28,7 +35,9 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun saveUser(user: User): Result<Unit> {
         return try {
-            userCollection.document(user.id).set(user).await()
+            val userEntity = user.toEntity()
+
+            userCollection.document(userEntity.id).set(userEntity).await()
             Result.success(Unit)
         } catch (_: Exception) {
             Result.failure(AppError.NetworkError)
@@ -38,7 +47,9 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getAllUsers(): List<User> {
         return try {
             val snapshot = userCollection.get().await()
-            snapshot.toObjects(User::class.java).filterNotNull()
+            val entities = snapshot.toObjects(UserEntity::class.java)
+
+            entities.map { it.toDomain() }
         } catch (_ : Exception) {
             emptyList()
         }
@@ -46,9 +57,12 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun updateProfile(userId: String, profile: UserProfile): Result<Unit> {
         return try {
+            val profileEntity = profile.toEntity()
+
             userCollection.document(userId)
-                .update("profile", profile)
+                .update("profile", profileEntity)
                 .await()
+
             Result.success(Unit)
         } catch (e: Exception) {
             val error = when{
@@ -57,6 +71,15 @@ class UserRepositoryImpl @Inject constructor(
                 else -> AppError.NetworkError
             }
             Result.failure(error)
+        }
+    }
+
+    override suspend fun deleteuser(id: String): Result<Unit> {
+        return try {
+            userCollection.document(id).delete().await()
+            Result.success(Unit)
+        } catch (_: Exception) {
+            Result.failure(AppError.NetworkError)
         }
     }
 }
