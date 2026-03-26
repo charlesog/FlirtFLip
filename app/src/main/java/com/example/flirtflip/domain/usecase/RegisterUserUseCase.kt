@@ -1,7 +1,9 @@
 package com.example.flirtflip.domain.usecase
 
 import com.example.flirtflip.domain.model.AppError
+import com.example.flirtflip.domain.model.Gender
 import com.example.flirtflip.domain.model.User
+import com.example.flirtflip.domain.model.UserProfile
 import com.example.flirtflip.domain.repository.AuthRepository
 import com.example.flirtflip.domain.repository.SecurityProvider
 import com.example.flirtflip.domain.repository.UserRepository
@@ -14,19 +16,30 @@ class RegisterUserUseCase @Inject constructor(
     private val securityProvider: SecurityProvider,
     private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke(user: User, passwordRaw: String): Result<Unit> {
-        val validation = UserValidator.validateRegistration(user)
+    suspend operator fun invoke(email: String, passwordRaw: String): Result<Unit> {
+        val validation = UserValidator.validateOnlyAuth(email, passwordRaw)
         if (validation is ValidationResult.Invalid) {
             return Result.failure(AppError.ValidationError(validation.message))
         }
 
-        val authResult = authRepository.signUp(user.email, passwordRaw)
+        val authResult = authRepository.signUp(email, passwordRaw)
         return authResult.fold(
             onSuccess = { uid ->
                 val hashedPassword = securityProvider.hashPassword(passwordRaw)
-                val finalUser = user.copy(
+                val finalUser = User(
                     id = uid,
-                    password = hashedPassword
+                    email = email,
+                    password = hashedPassword,
+                    profile = UserProfile(
+                        name = "",
+                        firstSurname = "",
+                        secondSurname = "",
+                        age = 0,
+                        gender = Gender.MALE,
+                        bio = "",
+                        hobbies = emptyList(),
+                        imageUrl = emptyList()
+                    )
                 )
 
                 userRepository.saveUser(finalUser)

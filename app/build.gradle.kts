@@ -99,6 +99,7 @@ dependencies {
 
     // --- TESTING ---
     testImplementation(libs.junit)
+    testImplementation("io.mockk:mockk:1.13.10")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.10.00"))
