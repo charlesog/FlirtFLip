@@ -11,7 +11,9 @@ import androidx.compose.ui.Modifier
 import com.example.flirtflip.ui.FlirtFlipApp
 import com.example.flirtflip.ui.navigation.AppNavigation
 import com.example.flirtflip.ui.theme.FlirtFlipTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

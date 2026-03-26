@@ -24,15 +24,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.delay
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.flirtflip.ui.viewmodel.SignUpViewModel
+import com.example.flirtflip.ui.viewmodel.SignUpUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
     onBackClick: () -> Unit = {},
-    onSignUpSuccess: () -> Unit = {}
+    onSignUpSuccess: () -> Unit = {},
+    viewModel: SignUpViewModel = hiltViewModel()
 ) {
     var name by remember { mutableStateOf("") }
     var firstSurname by remember { mutableStateOf("") }
@@ -43,13 +44,28 @@ fun SignUpScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    var acceptedTerms by remember { mutableStateOf(false) } // <--- Estado de los términos
-    var acceptedAge by remember { mutableStateOf(false) } // <--- Estado de los años
+    var acceptedTerms by remember { mutableStateOf(false) }
+    var acceptedAge by remember { mutableStateOf(false) }
 
-    val auth = FirebaseAuth.getInstance()
-    val db = FirebaseFirestore.getInstance()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Observar el estado del ViewModel
+    LaunchedEffect(uiState) {
+        when (val state = uiState) {
+            is SignUpUiState.Success -> {
+                Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()
+                onSignUpSuccess()
+                viewModel.resetState()
+            }
+            is SignUpUiState.Error -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+                viewModel.resetState()
+            }
+            else -> { /* No hacer nada */ }
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize().background(
@@ -208,39 +224,25 @@ fun SignUpScreen(
             // BOTÓN REGISTRARSE (Se habilita solo si acceptedTerms and acceptedAge es true)
             Button(
                 onClick = {
-                    if (password != confirmPassword) {
-                        Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
-                    } else {
-                        auth.createUserWithEmailAndPassword(email.trim(), password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    val userId = auth.currentUser?.uid
-                                    val userData = hashMapOf(
-                                        "name" to name,
-                                        "email" to email.trim(),
-                                        "uid" to userId,
-                                        "createdAt" to System.currentTimeMillis()
-                                    )
-
-                                    if (userId != null) {
-                                        db.collection("users").document(userId)
-                                            .set(userData)
-                                            .addOnSuccessListener {
-                                                onSignUpSuccess()
-                                            }
-                                            .addOnFailureListener { e ->
-                                                Toast.makeText(context, "Error en Firestore: ${e.message}", Toast.LENGTH_SHORT).show()
-                                            }
-                                    }
-                                } else {
-                                    Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                    }
+                    viewModel.signUp(
+                        name = name,
+                        firstSurname = firstSurname,
+                        secondSurname = secondSurname,
+                        email = email,
+                        password = password,
+                        confirmPassword = confirmPassword,
+                        acceptedTerms = acceptedTerms,
+                        acceptedAge = acceptedAge
+                    )
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-
-                enabled = acceptedTerms && acceptedAge && name.isNotBlank() && email.isNotBlank() && password.isNotBlank(),
+                enabled = acceptedTerms && acceptedAge && 
+                          name.isNotBlank() && 
+                          firstSurname.isNotBlank() && 
+                          email.isNotBlank() && 
+                          password.isNotBlank() &&
+                          confirmPassword.isNotBlank() &&
+                          uiState !is SignUpUiState.Loading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFFFF6B9D),
@@ -249,7 +251,14 @@ fun SignUpScreen(
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text(text = "Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                if (uiState is SignUpUiState.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color(0xFFFF6B9D)
+                    )
+                } else {
+                    Text(text = "Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
             }
 
             Spacer(modifier = Modifier.height(40.dp))
