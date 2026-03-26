@@ -6,7 +6,7 @@ data class User(
     val firstSurname: String = "",
     val secondSurname: String = "",
     val email: String = "",
-    val age: Int = 18,
+    val age: Int = 0,
     //'M' = Masculino, 'F' = Femenino, 'U' = Undefined
     val gender: Char = 'U',
     val profile: Profile = Profile()

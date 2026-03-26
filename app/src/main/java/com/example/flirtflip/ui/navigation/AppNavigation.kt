@@ -10,14 +10,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.flirtflip.ui.screens.LoginFormScreen
 import com.example.flirtflip.ui.screens.LoginScreen
 import com.example.flirtflip.ui.screens.SignUpScreen
-import com.example.flirtflip.ui.screens.CompleteProfileScreen // Importa tu nueva pantalla
+import com.example.flirtflip.ui.screens.CompleteProfileScreen
 
-// 1. Definición de rutas actualizada
 sealed class Screen(val route: String) {
     object Welcome : Screen("welcome")
     object Login : Screen("login")
     object SignUp : Screen("signup")
-    object CompleteProfile : Screen("complete_profile") // Nueva ruta
+    object CompleteProfile : Screen("complete_profile")
     object Home : Screen("home")
 }
 
@@ -42,10 +41,8 @@ fun AppNavigation() {
             LoginFormScreen(
                 onBackClick = { navController.popBackStack() },
                 onLoginSuccess = {
-                    // Ahora redirigimos a completar perfil antes del Home
-                    navController.navigate(Screen.CompleteProfile.route) {
-                        popUpTo(Screen.Welcome.route) { inclusive = true }
-                    }
+                    // Quitamos el popUpTo de aquí para permitir volver atrás si es necesario
+                    navController.navigate(Screen.CompleteProfile.route)
                 }
             )
         }
@@ -55,21 +52,21 @@ fun AppNavigation() {
             SignUpScreen(
                 onBackClick = { navController.popBackStack() },
                 onSignUpSuccess = {
-                    // Ahora redirigimos a completar perfil antes del Home
-                    navController.navigate(Screen.CompleteProfile.route) {
-                        popUpTo(Screen.Welcome.route) { inclusive = true }
-                    }
+                    // Quitamos el popUpTo de aquí también para mantener la pila
+                    navController.navigate(Screen.CompleteProfile.route)
                 }
             )
         }
 
-        // 2. NUEVA Pantalla: Completar Perfil
+        // Pantalla: Completar Perfil
         composable(Screen.CompleteProfile.route) {
             CompleteProfileScreen(
+                // Ahora popBackStack funcionará porque hay pantallas debajo en la pila
+                onBackClick = { navController.popBackStack() },
                 onCompleteSuccess = {
-                    // Una vez completado, ahora sí vamos al Home
+                    // Al terminar con éxito, aquí sí limpiamos TODO para ir al Home
                     navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.CompleteProfile.route) { inclusive = true }
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
                 }
             )

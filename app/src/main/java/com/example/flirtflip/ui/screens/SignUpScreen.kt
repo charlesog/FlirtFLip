@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,11 +35,16 @@ fun SignUpScreen(
     onSignUpSuccess: () -> Unit = {}
 ) {
     var name by remember { mutableStateOf("") }
+    var firstSurname by remember { mutableStateOf("") }
+    var secondSurname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
     var acceptedTerms by remember { mutableStateOf(false) } // <--- Estado de los términos
+    var acceptedAge by remember { mutableStateOf(false) } // <--- Estado de los años
 
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
@@ -48,32 +54,60 @@ fun SignUpScreen(
     Box(
         modifier = Modifier.fillMaxSize().background(
             brush = Brush.verticalGradient(
-                colors = listOf(Color(0xFFFF6B9D), Color(0xFFFF8FB3), Color(0xFFFFC2D4))
+                colors = listOf(Color(0xFFFF6B9D),
+                    Color(0xFFFF8FB3), Color(0xFFFFC2D4))
             )
         )
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(horizontal = 32.dp),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
+                .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(60.dp))
-            Text(text = "Crear Cuenta", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(text = "Crear Cuenta", fontSize = 36.sp, fontWeight = FontWeight.Bold,
+                color = Color.White)
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Campo Nombre
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Nombre") },
                 modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Email
+            OutlinedTextField(
+                value = firstSurname,
+                onValueChange = { firstSurname = it},
+                label = { Text("Primer Apellido") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = secondSurname,
+                onValueChange = { secondSurname = it},
+                label = { Text("Segundo Apellido") },
+                modifier = Modifier.fillMaxSize(),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -87,19 +121,23 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff, contentDescription = null)
+                        Icon(imageVector = if (passwordVisible) Icons.Filled.Visibility
+                        else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Ocultar contraseña"
+                            else "Mostrar contraseña", tint = Color(0xFFFF6B9D))
                     }
                 },
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true
@@ -107,22 +145,22 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Confirmar Contraseña
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text("Confirmar Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
-                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
+                colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true
             )
 
+
             Spacer(modifier = Modifier.height(20.dp))
 
-            // FILA DE TÉRMINOS Y CONDICIONES
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -143,10 +181,31 @@ fun SignUpScreen(
                     lineHeight = 16.sp
                 )
             }
-
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = acceptedAge,
+                    onCheckedChange = { acceptedAge = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color.White,
+                        checkmarkColor = Color(0xFFFF6B9D),
+                        uncheckedColor = Color.White
+                    )
+                )
+                Text(
+                    text = "Confirmo que tengo un minimo de 18 años",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp
+                )
+            }
+            
             Spacer(modifier = Modifier.height(24.dp))
 
-            // BOTÓN REGISTRARSE (Se habilita solo si acceptedTerms es true)
+            // BOTÓN REGISTRARSE (Se habilita solo si acceptedTerms and acceptedAge es true)
             Button(
                 onClick = {
                     if (password != confirmPassword) {
@@ -180,8 +239,8 @@ fun SignUpScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                // El botón solo funciona si los campos están llenos Y los términos aceptados
-                enabled = acceptedTerms && name.isNotBlank() && email.isNotBlank() && password.isNotBlank(),
+
+                enabled = acceptedTerms && acceptedAge && name.isNotBlank() && email.isNotBlank() && password.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFFFF6B9D),

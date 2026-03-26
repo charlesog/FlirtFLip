@@ -1,5 +1,6 @@
 package com.example.flirtflip.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -22,6 +24,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth // Importación necesaria
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,14 +35,10 @@ fun LoginFormScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) } // Para mostrar progreso
 
-    // Validación de email
-    val isEmailValid = remember(email) {
-        android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
-    // Validación completa del formulario
-    val isFormValid = email.isNotEmpty() && password.isNotEmpty() && isEmailValid
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance() // Instancia de Firebase
 
     Box(
         modifier = Modifier
@@ -63,7 +62,6 @@ fun LoginFormScreen(
         ) {
             Spacer(modifier = Modifier.weight(0.5f))
 
-            // Título
             Text(
                 text = "¡Bienvenido!",
                 fontSize = 36.sp,
@@ -98,20 +96,8 @@ fun LoginFormScreen(
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 singleLine = true,
-                isError = email.isNotEmpty() && !isEmailValid
+                enabled = !isLoading
             )
-
-            // Mensaje de error para email
-            if (email.isNotEmpty() && !isEmailValid) {
-                Text(
-                    text = "Por favor, introduce un email válido",
-                    color = Color(0xFFD32F2F),
-                    fontSize = 12.sp,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(start = 16.dp, top = 4.dp)
-                )
-            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -141,135 +127,126 @@ fun LoginFormScreen(
                         )
                     }
                 },
-                singleLine = true
+                singleLine = true,
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Olvidé mi contraseña
             Text(
                 text = "¿Olvidaste tu contraseña?",
                 fontSize = 14.sp,
                 color = Color.White,
                 modifier = Modifier
                     .align(Alignment.End)
-                    .clickable { /* TODO: Implementar recuperación de contraseña */ },
+                    .clickable {
+                        if (email.isNotBlank()){
+                            auth.sendPasswordResetEmail(email.trim())
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        Toast.makeText(context, "Email de restablecimiento enviado", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Error al enviar el email", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                        } else {
+                            Toast.makeText(context, "Por favor, introduce un email", Toast.LENGTH_SHORT).show()
+                        }
+                    },
                 fontWeight = FontWeight.Medium
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Botón de Iniciar Sesión
+            // Botón de Iniciar Sesión con comprobación en Firebase
             Button(
-                onClick = onLoginSuccess,
+                onClick = {
+                    if (email.isNotBlank() && password.isNotBlank()) {
+                        isLoading = true
+                        auth.signInWithEmailAndPassword(email.trim(), password.trim())
+                            .addOnCompleteListener { task ->
+                                isLoading = false
+                                if (task.isSuccessful) {
+                                    onLoginSuccess()
+                                } else {
+                                    val errorMsg = task.exception?.localizedMessage ?: "Error al iniciar sesión"
+                                    Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                    } else {
+                        Toast.makeText(context, "Por favor, rellena todos los campos", Toast.LENGTH_SHORT).show()
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
+                enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
-                    contentColor = Color(0xFFFF6B9D),
-                    disabledContainerColor = Color.White.copy(alpha = 0.6f),
-                    disabledContentColor = Color(0xFFFF6B9D).copy(alpha = 0.6f)
+                    contentColor = Color(0xFFFF6B9D)
                 ),
                 shape = RoundedCornerShape(16.dp),
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 8.dp,
                     pressedElevation = 12.dp
-                ),
-                enabled = isFormValid
-            ) {
-                Text(
-                    text = "Iniciar Sesión",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
                 )
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = Color(0xFFFF6B9D), modifier = Modifier.size(24.dp))
+                } else {
+                    Text(
+                        text = "Iniciar Sesión",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Divider con texto
+            // Divider y botones sociales se mantienen igual...
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Divider(
-                    modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.5f),
-                    thickness = 1.dp
-                )
-                Text(
-                    text = "O",
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-                Divider(
-                    modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.5f),
-                    thickness = 1.dp
-                )
+                Divider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.5f), thickness = 1.dp)
+                Text(text = "O", modifier = Modifier.padding(horizontal = 16.dp), color = Color.White, fontSize = 14.sp)
+                Divider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.5f), thickness = 1.dp)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botones de login social
             OutlinedButton(
-                onClick = { /* TODO: Implementar login con Google */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF424242)
-                ),
+                onClick = { /* TODO: Google */ },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White, contentColor = Color(0xFF424242)),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text(
-                    text = "🔍 Continuar con Google",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Text(text = "🔍 Continuar con Google", fontSize = 16.sp, fontWeight = FontWeight.Medium)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            //THINKEAR ESTO DE FACEBOOK MAYBE OUT
             OutlinedButton(
-                onClick = { /* TODO: Implementar login con Facebook */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF1877F2)
-                ),
+                onClick = { /* TODO: Facebook */ },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White, contentColor = Color(0xFF1877F2)),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text(
-                    text = "📘 Continuar con Facebook",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Text(text = "📘 Continuar con Facebook", fontSize = 16.sp, fontWeight = FontWeight.Medium)
             }
 
             Spacer(modifier = Modifier.weight(1f))
         }
 
-        // Botón de retroceso - colocado después del Column para que esté encima
         Surface(
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.TopStart),
+            modifier = Modifier.padding(16.dp).align(Alignment.TopStart),
             color = Color.White.copy(alpha = 0.3f),
             shape = RoundedCornerShape(12.dp)
         ) {
-            IconButton(
-                onClick = onBackClick
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Volver",
-                    tint = Color.White
-                )
+            IconButton(onClick = onBackClick) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
             }
         }
     }
