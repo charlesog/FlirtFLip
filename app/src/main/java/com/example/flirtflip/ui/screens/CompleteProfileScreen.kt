@@ -189,7 +189,7 @@ fun CompleteProfileScreen(
                         Toast.makeText(context, "Completa todos los campos correctamente", Toast.LENGTH_SHORT).show()
                     }
                 },
-                enabled = isAdult && bio.isNotEmpty(), // El botón solo se activa si es adulto
+                enabled = isAdult && bio.isNotEmpty() && selectedGender.isNotBlank(),
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,

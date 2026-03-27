@@ -7,7 +7,7 @@ object UserValidator {
         return when {
             user.profile.age < 18 -> ValidationResult.Invalid("Age must be at least 18")
             user.profile.name.isBlank() -> ValidationResult.Invalid("Name cannot be empty")
-            user.password.length < 8 -> ValidationResult.Invalid("Password must be at least 6 characters long")
+            user.password.length < 6 -> ValidationResult.Invalid("Password must be at least 6 characters long")
             !user.email.contains("@") -> ValidationResult.Invalid("Invalid email format")
             else -> ValidationResult.Valid
         }
