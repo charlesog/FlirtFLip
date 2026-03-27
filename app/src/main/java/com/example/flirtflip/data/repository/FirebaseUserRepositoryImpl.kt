@@ -40,7 +40,7 @@ class FirebaseUserRepositoryImpl @Inject constructor(
             userCollection.document(userEntity.id).set(userEntity).await()
             Result.success(Unit)
         } catch (_: Exception) {
-            Result.failure(AppError.NetworkError)
+            Result.failure(AppError.NetworkError())
         }
     }
 
@@ -67,8 +67,8 @@ class FirebaseUserRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             val error = when{
                 e is FirebaseFirestoreException && e.code ==
-                        FirebaseFirestoreException.Code.NOT_FOUND -> AppError.UserNotFound
-                else -> AppError.NetworkError
+                        FirebaseFirestoreException.Code.NOT_FOUND -> AppError.UserNotFound()
+                else -> AppError.NetworkError()
             }
             Result.failure(error)
         }
@@ -79,7 +79,7 @@ class FirebaseUserRepositoryImpl @Inject constructor(
             userCollection.document(id).delete().await()
             Result.success(Unit)
         } catch (_: Exception) {
-            Result.failure(AppError.NetworkError)
+            Result.failure(AppError.NetworkError())
         }
     }
 }

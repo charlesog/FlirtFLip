@@ -35,7 +35,7 @@ class RegisterUserUseCase @Inject constructor(
                         firstSurname = "",
                         secondSurname = "",
                         age = 0,
-                        gender = Gender.MALE,
+                        gender = Gender.UNDEFINED,
                         bio = "",
                         hobbies = emptyList(),
                         imageUrl = emptyList()

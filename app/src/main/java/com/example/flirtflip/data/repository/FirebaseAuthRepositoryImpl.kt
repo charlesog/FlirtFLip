@@ -22,7 +22,7 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
 
             Result.success(uid)
         } catch (_: Exception) {
-            Result.failure(AppError.NetworkError)
+            Result.failure(AppError.NetworkError())
         }
     }
 
@@ -32,11 +32,15 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
             val uid= result.user?.uid ?:throw Exception("UID nulo")
             Result.success(uid)
         } catch (_: Exception) {
-            Result.failure(AppError.NetworkError)
+            Result.failure(AppError.NetworkError())
         }
     }
 
     override suspend fun signOut() {
         firebaseAuth.signOut()
+    }
+
+    override fun getCurrentUserId(): String? {
+        return firebaseAuth.currentUser?.uid
     }
 }

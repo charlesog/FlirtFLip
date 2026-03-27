@@ -15,7 +15,7 @@ class GetDeviceLocationUseCase @Inject constructor(
             if (location != null) {
                 Result.success(location)
             } else {
-                Result.failure(AppError.LocationDisabled)
+                Result.failure(AppError.LocationDisabled())
             }
         }catch (e: Exception){
             Result.failure(AppError.UnknownError(e))
