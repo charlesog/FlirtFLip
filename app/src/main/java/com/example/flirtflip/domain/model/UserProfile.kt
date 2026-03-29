@@ -8,7 +8,8 @@ data class UserProfile(
     val gender: Gender,
     val bio: String,
     val hobbies: List<Hobby>,
-    val imageUrl: List<String>,
+    val mainPhotoUrl: String,
+    val galleryPhotoUrls: List<String>,
     val job: String? = null,
     val location: Location? = null
 )

@@ -74,7 +74,7 @@ class FirebaseUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteuser(id: String): Result<Unit> {
+    override suspend fun deleteUser(id: String): Result<Unit> {
         return try {
             userCollection.document(id).delete().await()
             Result.success(Unit)

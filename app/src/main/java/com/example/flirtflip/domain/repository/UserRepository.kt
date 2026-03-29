@@ -8,6 +8,6 @@ interface UserRepository {
     suspend fun saveUser(user: User): Result<Unit>
     suspend fun getAllUsers(): List<User>
     suspend fun updateProfile(userId: String, profile: UserProfile): Result<Unit>
-    suspend fun deleteuser(id: String): Result<Unit>
+    suspend fun deleteUser(id: String): Result<Unit>
 
 }

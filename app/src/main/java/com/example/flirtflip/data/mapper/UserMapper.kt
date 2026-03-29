@@ -35,7 +35,7 @@ fun UserProfile.toEntity(): UserProfileEntity {
         gender = this.gender.name,
         bio = this.bio,
         hobbies = this.hobbies.map { it.name },
-        imageUrl = this.imageUrl,
+        imageUrl = this.galerryUrls,
         job = this.job,
         latitude = this.location?.latitude,
         longitude = this.location?.longitude
@@ -53,7 +53,7 @@ fun UserProfileEntity.toDomain(): UserProfile {
         hobbies = this.hobbies.mapNotNull {
             try { Hobby.valueOf(it) } catch (e: Exception) { null }
         },
-        imageUrl = this.imageUrl,
+        galerryUrls = this.imageUrl,
         job = this.job,
         location = if (latitude != null && longitude != null) {
             Location(latitude, longitude)

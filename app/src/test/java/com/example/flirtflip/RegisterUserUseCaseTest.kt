@@ -40,7 +40,7 @@ class RegisterUserDebugFlowTest {
         // NOTA: Si tu UseCase aún pide el objeto User, pásale uno básico
         val userBase = User(id = "", email = emailRegistro, password = "", profile = UserProfile(
             name = "", firstSurname = "", secondSurname = "", age = 0,
-            gender = Gender.MALE, bio = "", hobbies = emptyList(), imageUrl = emptyList()
+            gender = Gender.MALE, bio = "", hobbies = emptyList(), galerryUrls = emptyList()
         ))
 
         useCase(userBase.email, passwordOriginal)

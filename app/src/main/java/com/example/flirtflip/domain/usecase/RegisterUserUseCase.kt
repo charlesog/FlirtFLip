@@ -38,7 +38,8 @@ class RegisterUserUseCase @Inject constructor(
                         gender = Gender.UNDEFINED,
                         bio = "",
                         hobbies = emptyList(),
-                        imageUrl = emptyList()
+                        mainPhotoUrl = "",
+                        galleryPhotoUrls = emptyList()
                     )
                 )
 

@@ -13,11 +13,12 @@ object UserValidator {
 
     fun validateFullProfile(userProfile: UserProfile): ValidationResult {
         return when {
+            userProfile.mainPhotoUrl.isBlank() -> ValidationResult.Invalid("Main photo cannot be empty")
             userProfile.name.isBlank() -> ValidationResult.Invalid("Name cannot be empty")
             userProfile.age < 18 -> ValidationResult.Invalid("Age must be at least 18")
             userProfile.gender.isInvalid() -> ValidationResult.Invalid("Gender cannot be undefined")
-            userProfile.imageUrl.isEmpty() -> ValidationResult.Invalid("At least one photo is required")
-            userProfile.imageUrl.size > 6 -> ValidationResult.Invalid("Maximum of 6 photos allowed")
+            userProfile.galleryPhotoUrls.isEmpty() -> ValidationResult.Invalid("At least one photo is required")
+            userProfile.galleryPhotoUrls.size > 6 -> ValidationResult.Invalid("Maximum of 6 photos allowed")
             else -> ValidationResult.Valid
         }
     }
