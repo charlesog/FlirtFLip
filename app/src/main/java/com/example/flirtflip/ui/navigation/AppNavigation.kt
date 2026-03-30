@@ -1,9 +1,6 @@
 package com.example.flirtflip.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
-import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -11,6 +8,7 @@ import com.example.flirtflip.ui.screens.LoginFormScreen
 import com.example.flirtflip.ui.screens.LoginScreen
 import com.example.flirtflip.ui.screens.SignUpScreen
 import com.example.flirtflip.ui.screens.CompleteProfileScreen
+import com.example.flirtflip.ui.screens.HomeScreen
 
 sealed class Screen(val route: String) {
     object Welcome : Screen("welcome")
@@ -74,21 +72,7 @@ fun AppNavigation() {
 
         // Pantalla principal
         composable(Screen.Home.route) {
-            HomeScreenPlaceholder()
+            HomeScreen()
         }
-    }
-}
-
-@Composable
-fun HomeScreenPlaceholder() {
-    Box(
-        modifier = androidx.compose.ui.Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        androidx.compose.material3.Text(
-            text = "¡Perfil Completado! 💘\n\nBienvenido al Home de FlirtFlip",
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            fontSize = 20.sp
-        )
     }
 }
