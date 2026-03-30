@@ -8,7 +8,8 @@ data class UserProfileEntity(
     val gender: String = "UNDEFINIED",
     val bio: String = "",
     val hobbies: List<String> = emptyList(),
-    val imageUrl: List<String> = emptyList(),
+    val mainPhotoUrl: String = "",
+    val galleryPhotoUrls: List<String> = emptyList(),
     val job: String? = null,
     val latitude: Double? = null,
     val longitude: Double? = null

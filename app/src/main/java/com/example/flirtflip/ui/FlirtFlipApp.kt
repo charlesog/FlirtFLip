@@ -14,7 +14,7 @@ fun FlirtFlipApp() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text("¡FlirtFlip con Compose!")
+        Text("¡FlirtFlip!")
     }
 }
 

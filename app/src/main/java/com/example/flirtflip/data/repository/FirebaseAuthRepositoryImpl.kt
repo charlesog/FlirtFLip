@@ -39,8 +39,4 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
     override suspend fun signOut() {
         firebaseAuth.signOut()
     }
-
-    override fun getCurrentUserId(): String? {
-        return firebaseAuth.currentUser?.uid
-    }
 }

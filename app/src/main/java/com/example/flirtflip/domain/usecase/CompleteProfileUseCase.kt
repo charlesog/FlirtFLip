@@ -15,7 +15,7 @@ class CompleteProfileUseCase @Inject constructor(
     private val imageRepository: ImageRepository
 ) {
     suspend operator fun invoke(profile: UserProfile, localPhotoUri: String? = null) : Result<Unit> {
-        val currentId = authRepository.getCurrentUserId() ?:
+        val currentId = authRepository.currentUserId ?:
             return Result.failure(Exception("User not authenticated"))
 
         var finalProfile = profile

@@ -3,10 +3,25 @@ package com.example.flirtflip.domain.validator
 import com.example.flirtflip.domain.model.UserProfile
 
 object UserValidator {
+    /**
+     * Explicación de la Regex de contraseña:
+     *
+     * ^                : Inicio de la cadena.
+     * (?=.*[A-Z])      : Debe contener al menos una letra MAYÚSCULA.
+     * (?=.*[a-z])      : Debe contener al menos una letra minúscula.
+     * (?=.*\d)         : Debe contener al menos un dígito (número).
+     * (?=.*[@$!%*?&])  : Debe contener al menos un carácter especial (@, $, !, %, *, ?, &).
+     * [A-Za-z\d@$!%*?&]: Define el conjunto de caracteres permitidos.
+     * {8,}             : Longitud mínima de 8 caracteres (sin límite máximo).
+     * $                : Fin de la cadena.
+     */
+    private val passwordRegex = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
+
     fun validateOnlyAuth(email: String, passwordRaw: String): ValidationResult {
         return when {
             !email.contains("@") -> ValidationResult.Invalid("Invalid email format")
-            passwordRaw.length < 8 -> ValidationResult.Invalid("Password must be at least 8 characters long")
+            !email.contains("@") -> ValidationResult.Invalid("Invalid email format")
+            !passwordRaw.contains(passwordRegex) -> ValidationResult.Invalid("The password does not meet the requirements")
             else -> ValidationResult.Valid
         }
     }
