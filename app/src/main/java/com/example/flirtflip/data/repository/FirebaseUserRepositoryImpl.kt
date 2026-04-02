@@ -40,7 +40,8 @@ class FirebaseUserRepositoryImpl @Inject constructor(
 
             userCollection.document(userEntity.id).set(userEntity).await()
             Result.success(Unit)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            e.printStackTrace()
             Result.failure(AppError.NetworkError())
         }
     }

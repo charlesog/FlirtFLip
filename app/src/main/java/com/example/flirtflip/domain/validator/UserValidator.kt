@@ -20,7 +20,6 @@ object UserValidator {
     fun validateOnlyAuth(email: String, passwordRaw: String): ValidationResult {
         return when {
             !email.contains("@") -> ValidationResult.Invalid("Invalid email format")
-            !email.contains("@") -> ValidationResult.Invalid("Invalid email format")
             !passwordRaw.contains(passwordRegex) -> ValidationResult.Invalid("The password does not meet the requirements")
             else -> ValidationResult.Valid
         }
