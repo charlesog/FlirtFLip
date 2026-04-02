@@ -6,14 +6,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.flirtflip.ui.screens.HomeScreen
 import com.example.flirtflip.ui.screens.LoginScreen
+import com.example.flirtflip.ui.screens.ProfileEditScreen
 import com.example.flirtflip.ui.screens.SignUpScreen
 
 sealed class Screen(val route: String) {
-    object Welcome : Screen("welcome")
     object Login : Screen("login")
     object SignUp : Screen("signup")
     object CompleteProfile : Screen("complete_profile")
     object Home : Screen("home")
+    object ProfileEdit : Screen("profile_edit")
 }
 
 @Composable
@@ -56,7 +57,17 @@ fun AppNavigation() {
             HomeScreen(
                 onNavigateToMatches = { /* TODO */ },
                 onNavigateToChat = { /* TODO */ },
-                onNavigateToProfile = { /* TODO */ }
+                onNavigateToProfile = {
+                    navController.navigate(Screen.ProfileEdit.route)
+                }
+            )
+        }
+
+        composable(Screen.ProfileEdit.route) {
+            ProfileEditScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                }
             )
         }
     }
