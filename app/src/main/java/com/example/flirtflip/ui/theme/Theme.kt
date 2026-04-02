@@ -36,7 +36,7 @@ fun FlirtFlipTheme(
     MaterialTheme(
         colorScheme = LightColorScheme,
         typography = Typography,
-        shapes = Shapes,  // ← AÑADE ESTA LÍNEA
+        shapes = Shapes,
         content = content
     )
 }
