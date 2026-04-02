@@ -4,6 +4,7 @@ import com.example.flirtflip.data.entity.UserEntity
 import com.example.flirtflip.data.mapper.toDomain
 import com.example.flirtflip.data.mapper.toEntity
 import com.example.flirtflip.domain.model.AppError
+import com.example.flirtflip.domain.model.Location
 import com.example.flirtflip.domain.model.User
 import com.example.flirtflip.domain.model.UserProfile
 import com.example.flirtflip.domain.repository.UserRepository
@@ -44,14 +45,15 @@ class FirebaseUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllUsers(): List<User> {
-        return try {
+    override suspend fun getAllUsers(): Result<List<User>> {
+        try {
             val snapshot = userCollection.get().await()
             val entities = snapshot.toObjects(UserEntity::class.java)
 
-            entities.map { it.toDomain() }
-        } catch (_ : Exception) {
-            emptyList()
+            val domainUsers = entities.map { it.toDomain() }
+            return Result.success(domainUsers)
+        }catch (e: Exception){
+            return Result.failure(AppError.UnknownError(e))
         }
     }
 
@@ -80,6 +82,18 @@ class FirebaseUserRepositoryImpl @Inject constructor(
             Result.success(Unit)
         } catch (_: Exception) {
             Result.failure(AppError.NetworkError())
+        }
+    }
+
+    override suspend fun updateLocation(userId: String, location: Location): Result<Unit> {
+        try {
+            userCollection.document(userId)
+                .update("location", location)
+                .await()
+
+            return Result.success(Unit)
+        } catch (e: Exception) {
+            return Result.failure(AppError.NetworkError())
         }
     }
 }
