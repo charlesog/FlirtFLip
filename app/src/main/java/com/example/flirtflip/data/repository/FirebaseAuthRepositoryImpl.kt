@@ -15,11 +15,14 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
     override val currentUserId: String?
         get() = firebaseAuth.currentUser?.uid
 
+    // Firebase Auth persiste la sesión automáticamente entre reinicios
+    override val isLoggedIn: Boolean
+        get() = firebaseAuth.currentUser != null
+
     override suspend fun signUp(email: String, password: String): Result<String> {
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val uid = result.user?.uid ?: throw Exception("UID nulo")
-
             Result.success(uid)
         } catch (_: Exception) {
             Result.failure(AppError.NetworkError())
@@ -29,7 +32,7 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
     override suspend fun login(email: String, password: String): Result<String> {
         return try {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-            val uid= result.user?.uid ?:throw Exception("UID nulo")
+            val uid = result.user?.uid ?: throw Exception("UID nulo")
             Result.success(uid)
         } catch (_: Exception) {
             Result.failure(AppError.NetworkError())

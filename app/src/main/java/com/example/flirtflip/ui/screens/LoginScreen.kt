@@ -208,16 +208,37 @@ fun LoginScreen(
                             shape = RoundedCornerShape(12.dp)
                         )
 
-                        // Olvidaste contrasena
-                        TextButton(
-                            onClick = { },
-                            modifier = Modifier.align(Alignment.End)
+                        // Fila: Recuérdame + ¿Olvidaste la contraseña?
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Has olvidado tu contrasena?",
-                                color = primary,
-                                fontSize = 13.sp
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Checkbox(
+                                    checked = viewModel.rememberMe,
+                                    onCheckedChange = { viewModel.rememberMe = it },
+                                    colors = CheckboxDefaults.colors(
+                                        checkedColor = primary,
+                                        uncheckedColor = onSurfaceVariant
+                                    )
+                                )
+                                Text(
+                                    text = "Recuérdame",
+                                    fontSize = 13.sp,
+                                    color = onSurfaceVariant
+                                )
+                            }
+                            TextButton(onClick = { }) {
+                                Text(
+                                    text = "¿Olvidaste tu contraseña?",
+                                    color = primary,
+                                    fontSize = 13.sp
+                                )
+                            }
                         }
 
                         // Error
