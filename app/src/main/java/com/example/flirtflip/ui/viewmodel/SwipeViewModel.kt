@@ -2,7 +2,6 @@ package com.example.flirtflip.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.flirtflip.domain.model.SwipeUiState
 import com.example.flirtflip.domain.model.User
 import com.example.flirtflip.domain.repository.AuthRepository
 import com.example.flirtflip.domain.repository.UserRepository
@@ -33,9 +32,11 @@ class SwipeViewModel @Inject constructor(
             userRepository.getAllUsers().fold(
                 onSuccess = { users ->
                     val filteredUsers = users.filter { it.id != authRepository.currentUserId }
-
-                    if (filteredUsers.isEmpty()) _uiState.value = SwipeUiState.Empty
-                    else _uiState.value = SwipeUiState.Success(filteredUsers)
+                    if (filteredUsers.isEmpty()) {
+                        _uiState.value = SwipeUiState.Empty
+                    } else {
+                        _uiState.value = SwipeUiState.Success(profiles = filteredUsers)
+                    }
                 },
                 onFailure = { _uiState.value = SwipeUiState.Error("Error al cargar perfiles") }
             )
@@ -46,7 +47,7 @@ class SwipeViewModel @Inject constructor(
         val fromId = authRepository.currentUserId ?: return
 
         viewModelScope.launch {
-            processSwipeUseCase(
+            val result = processSwipeUseCase(
                 fromUserId = fromId,
                 toUserId = targetUser.id,
                 isLike = isLike
@@ -54,12 +55,38 @@ class SwipeViewModel @Inject constructor(
 
             val currentState = _uiState.value
             if (currentState is SwipeUiState.Success) {
-                val nextIndex = currentState.currentIndex + 1
-                if (nextIndex < currentState.users.size) {
-                    _uiState.value = currentState.copy(currentIndex = nextIndex)
+                val isMatch = result.getOrDefault(false)
+                val nextProfiles = currentState.profiles.filter { it.id != targetUser.id }
+
+                if (nextProfiles.isEmpty()) {
+                    if (isMatch) {
+                        _uiState.value = currentState.copy(
+                            profiles = emptyList(),
+                            showMatchDialog = true,
+                            matchedUser = targetUser
+                        )
+                    } else {
+                        _uiState.value = SwipeUiState.Empty
+                    }
                 } else {
-                    _uiState.value = SwipeUiState.Empty
+                    _uiState.value = currentState.copy(
+                        profiles = nextProfiles,
+                        showMatchDialog = isMatch,
+                        matchedUser = if (isMatch) targetUser else null,
+                        currentIndex = 0
+                    )
                 }
+            }
+        }
+    }
+
+    fun dismissMatchDialog() {
+        val currentState = _uiState.value
+        if (currentState is SwipeUiState.Success) {
+            if (currentState.profiles.isEmpty()) {
+                _uiState.value = SwipeUiState.Empty
+            } else {
+                _uiState.value = currentState.copy(showMatchDialog = false, matchedUser = null)
             }
         }
     }

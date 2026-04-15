@@ -1,6 +1,7 @@
 package com.example.flirtflip.domain.usecase
 
 import com.example.flirtflip.domain.model.AppError
+import com.example.flirtflip.domain.model.Match
 import com.example.flirtflip.domain.model.Swipe
 import com.example.flirtflip.domain.model.SwipeType
 import com.example.flirtflip.domain.repository.MatchRepository
@@ -9,7 +10,7 @@ import javax.inject.Inject
 
 class ProcessSwipeUseCase @Inject constructor(
     private val matchRepository: MatchRepository
-){
+) {
     suspend operator fun invoke(fromUserId: String, toUserId: String, isLike: Boolean): Result<Boolean> {
         val swipe = Swipe(
             id = UUID.randomUUID().toString(),
@@ -20,21 +21,33 @@ class ProcessSwipeUseCase @Inject constructor(
         )
 
         val saveResult = matchRepository.performSwipe(swipe)
-        if (saveResult.isFailure) {
-            val exception = saveResult.exceptionOrNull() ?: Exception("Unknown error")
-            return Result.failure(AppError.UnknownError(exception as Exception))
+
+        saveResult.onFailure {
+            return Result.failure(AppError.UnknownError(it as Exception))
         }
 
         if (isLike) {
-            try {
-                val exists = matchRepository.checkIfMatchExists(toUserId, fromUserId)
+            return try {
+                val exists = matchRepository.checkIfMatchExists(fromUserId, toUserId)
+
                 if (exists) {
-                    return Result.success(true)
+                    val newMatch = Match(
+                        id = UUID.randomUUID().toString(),
+                        idUser1 = fromUserId,
+                        idUser2 = toUserId,
+                        timestamp = System.currentTimeMillis()
+                    )
+
+                    matchRepository.saveMatch(newMatch)
+                    Result.success(true)
+                } else {
+                    Result.success(false)
                 }
             } catch (e: Exception) {
-                return Result.failure(AppError.UnknownError(e))
+                Result.failure(AppError.UnknownError(e))
             }
         }
+
         return Result.success(false)
     }
 }

@@ -21,15 +21,18 @@ class SignUpViewModel @Inject constructor(
     var errorMessage by mutableStateOf<String?>(null)
 
     fun onSignUpClick(onSuccess: () -> Unit) {
+        if (email.isBlank() || password.isBlank()) {
+            errorMessage = "Por favor, rellena todos los campos"
+            return
+        }
+
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
 
-            val result = registerUserUseCase(email, password)
-
-            result.fold(
+            registerUserUseCase(email, password).fold(
                 onSuccess = { onSuccess() },
-                onFailure = { errorMessage = it.message }
+                onFailure = { errorMessage = it.message ?: "Error desconocido al registrarse" }
             )
             isLoading = false
         }

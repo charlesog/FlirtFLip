@@ -9,4 +9,5 @@ interface MatchRepository {
     suspend fun getMatchesForUser(userId: String): Flow<List<Match>>
     suspend fun checkIfMatchExists(userId1: String, userId2: String): Boolean
     fun getSwipesForUser(userId: String): Flow<List<Swipe>>
+    suspend fun saveMatch(match: Match): Result<Unit>
 }
