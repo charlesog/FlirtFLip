@@ -1,11 +1,13 @@
 package com.example.flirtflip.data.di
 
 import com.example.flirtflip.data.repository.FirebaseAuthRepositoryImpl
+import com.example.flirtflip.data.repository.FirebaseChatRepositoryImpl
 import com.example.flirtflip.data.repository.FirebaseImageRepositoryImpl
 import com.example.flirtflip.data.repository.FirebaseMatchRepositoryImpl
 import com.example.flirtflip.data.repository.FirebaseUserRepositoryImpl
 import com.example.flirtflip.data.repository.FusedLocationRepositoryImpl
 import com.example.flirtflip.domain.repository.AuthRepository
+import com.example.flirtflip.domain.repository.ChatRepository
 import com.example.flirtflip.domain.repository.ImageRepository
 import com.example.flirtflip.domain.repository.LocationRepository
 import com.example.flirtflip.domain.repository.MatchRepository
@@ -50,4 +52,10 @@ abstract class RepositoryModule {
     abstract fun bindImageRepository(
         imageRepositoryImpl: FirebaseImageRepositoryImpl
     ): ImageRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindChatRepository(
+        chatRepositoryImpl: FirebaseChatRepositoryImpl
+    ): ChatRepository
 }

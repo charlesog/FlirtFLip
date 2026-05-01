@@ -12,4 +12,5 @@ interface UserRepository {
     suspend fun deleteUser(id: String): Result<Unit>
     suspend fun updateLocation(userId: String, location: Location): Result<Unit>
 
+    suspend fun getInteractedUserIds(userId: String): Result<List<String>>
 }

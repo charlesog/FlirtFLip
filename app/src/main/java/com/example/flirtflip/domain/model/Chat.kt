@@ -7,5 +7,7 @@ data class Chat(
     val userIds: List<String>,
     val lastMessage: String?,
     val lastMessageTimestamp: LocalDateTime?,
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
+    val otherUserName: String = "",
+    val otherUserProfileUrl: String = ""
 )

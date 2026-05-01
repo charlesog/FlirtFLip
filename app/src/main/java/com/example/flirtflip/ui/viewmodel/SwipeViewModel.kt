@@ -22,6 +22,8 @@ class SwipeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SwipeUiState>(SwipeUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
+    val currentUserId: String? get() = authRepository.currentUserId
+
     init {
         loadUsers()
     }
@@ -29,22 +31,32 @@ class SwipeViewModel @Inject constructor(
     private fun loadUsers() {
         viewModelScope.launch {
             _uiState.value = SwipeUiState.Loading
-            userRepository.getAllUsers().fold(
-                onSuccess = { users ->
-                    val filteredUsers = users.filter { it.id != authRepository.currentUserId }
-                    if (filteredUsers.isEmpty()) {
-                        _uiState.value = SwipeUiState.Empty
-                    } else {
-                        _uiState.value = SwipeUiState.Success(profiles = filteredUsers)
-                    }
-                },
-                onFailure = { _uiState.value = SwipeUiState.Error("Error al cargar perfiles") }
-            )
+            val myId = currentUserId ?: return@launch
+
+            val allUserResult = userRepository.getAllUsers()
+            val interactedUserIdsResult = userRepository.getInteractedUserIds(myId)
+
+            if (allUserResult.isSuccess && interactedUserIdsResult.isSuccess) {
+                val allUsers = allUserResult.getOrThrow()
+                val seenIds = interactedUserIdsResult.getOrThrow()
+
+                val finalProfiles = allUsers.filter { user ->
+                    user.id != myId && !seenIds.contains(user.id)
+                }
+
+                if (finalProfiles.isEmpty()) {
+                    _uiState.value = SwipeUiState.Empty
+                } else {
+                    _uiState.value = SwipeUiState.Success(profiles = finalProfiles)
+                }
+            } else {
+                _uiState.value = SwipeUiState.Error("Fallo al sincronizar datos")
+            }
         }
     }
 
     fun onSwipe(targetUser: User, isLike: Boolean) {
-        val fromId = authRepository.currentUserId ?: return
+        val fromId = currentUserId ?: return
 
         viewModelScope.launch {
             val result = processSwipeUseCase(
@@ -59,14 +71,14 @@ class SwipeViewModel @Inject constructor(
                 val nextProfiles = currentState.profiles.filter { it.id != targetUser.id }
 
                 if (nextProfiles.isEmpty()) {
-                    if (isMatch) {
-                        _uiState.value = currentState.copy(
+                    _uiState.value = if (isMatch) {
+                        currentState.copy(
                             profiles = emptyList(),
                             showMatchDialog = true,
                             matchedUser = targetUser
                         )
                     } else {
-                        _uiState.value = SwipeUiState.Empty
+                        SwipeUiState.Empty
                     }
                 } else {
                     _uiState.value = currentState.copy(

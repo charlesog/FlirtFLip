@@ -28,7 +28,8 @@ import com.example.flirtflip.ui.viewmodel.SwipeUiState
 fun HomeScreen(
     viewModel: SwipeViewModel = hiltViewModel(),
     onNavigateToMatches: () -> Unit = {},
-    onNavigateToChat: () -> Unit = {},
+    onNavigateToChatList: () -> Unit = {},
+    onNavigateToChatDetail: (String) -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -40,7 +41,7 @@ fun HomeScreen(
                 selectedTab = selectedTab,
                 onTabSelected = { selectedTab = it },
                 onMatchesClick = onNavigateToMatches,
-                onChatClick = onNavigateToChat,
+                onChatClick = onNavigateToChatList,
                 onProfileClick = onNavigateToProfile
             )
         },
@@ -63,7 +64,6 @@ fun HomeScreen(
                         is SwipeUiState.Loading -> CircularProgressIndicator(color = primary)
 
                         is SwipeUiState.Success -> {
-                            // VALIDACIÓN ANTI-CRASH
                             if (state.profiles.isNotEmpty()) {
                                 val currentUser = state.profiles[state.currentIndex]
 
@@ -79,14 +79,22 @@ fun HomeScreen(
                                 NoMoreProfilesCard()
                             }
 
-                            // DIÁLOGO DE MATCH
                             if (state.showMatchDialog && state.matchedUser != null) {
                                 MatchDialog(
                                     matchedUser = state.matchedUser,
                                     onDismiss = { viewModel.dismissMatchDialog() },
                                     onSendMessage = {
-                                        viewModel.dismissMatchDialog()
-                                        onNavigateToChat()
+                                        val myId = viewModel.currentUserId
+                                        val otherId = state.matchedUser.id
+
+                                        if (myId != null) {
+                                            // Generar chatId consistente (puedes usar esta lógica o dejar que el Repo lo gestione)
+                                            val chatId = listOfNotNull(myId, otherId).sorted().joinToString("_")
+
+                                            viewModel.dismissMatchDialog()
+                                            // CORRECCIÓN: El diálogo de Match va directo al DETALLE
+                                            onNavigateToChatDetail(chatId)
+                                        }
                                     }
                                 )
                             }
@@ -111,6 +119,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 @Composable
 private fun MatchDialog(matchedUser: User, onDismiss: () -> Unit, onSendMessage: () -> Unit) {
@@ -192,15 +201,30 @@ private fun HomeTopBar() {
 }
 
 @Composable
-private fun FlirtFlipBottomBar(selectedTab: Int, onTabSelected: (Int) -> Unit, onMatchesClick: () -> Unit, onChatClick: () -> Unit, onProfileClick: () -> Unit) {
+private fun FlirtFlipBottomBar(
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit,
+    onMatchesClick: () -> Unit,
+    onChatClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
     NavigationBar(containerColor = Color.White) {
-        val items = listOf("Explorar" to Icons.Default.Explore, "Matches" to Icons.Default.Favorite, "Chats" to Icons.Default.Chat, "Perfil" to Icons.Default.Person)
+        val items = listOf(
+            "Explorar" to Icons.Default.Explore,
+            "Matches" to Icons.Default.Favorite,
+            "Chats" to Icons.Default.Chat,
+            "Perfil" to Icons.Default.Person
+        )
         items.forEachIndexed { index, item ->
             NavigationBarItem(
                 selected = selectedTab == index,
                 onClick = {
                     onTabSelected(index)
-                    when(index) { 1 -> onMatchesClick(); 2 -> onChatClick(); 3 -> onProfileClick() }
+                    when(index) {
+                        1 -> onMatchesClick()
+                        2 -> onChatClick()
+                        3 -> onProfileClick()
+                    }
                 },
                 icon = { Icon(item.second, null) },
                 label = { Text(item.first) }

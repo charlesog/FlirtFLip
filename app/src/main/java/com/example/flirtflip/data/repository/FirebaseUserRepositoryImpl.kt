@@ -97,4 +97,18 @@ class FirebaseUserRepositoryImpl @Inject constructor(
             return Result.failure(AppError.NetworkError())
         }
     }
+
+    override suspend fun getInteractedUserIds(userId: String): Result<List<String>> {
+        return try {
+            val snapshot = firestore.collection("swipes")
+                .whereEqualTo("fromUserId", userId)
+                .get()
+                .await()
+
+            val ids = snapshot.documents.mapNotNull { it.getString("toUserId") }
+            Result.success(ids)
+        } catch (_: Exception) {
+            Result.failure(AppError.NetworkError())
+        }
+    }
 }
