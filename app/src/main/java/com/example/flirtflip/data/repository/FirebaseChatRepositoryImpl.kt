@@ -8,7 +8,7 @@ import com.example.flirtflip.domain.model.Chat
 import com.example.flirtflip.domain.model.Message
 import com.example.flirtflip.domain.repository.ChatRepository
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -43,6 +43,24 @@ class FirebaseChatRepositoryImpl @Inject constructor(
         return try {
             val messageEntity = message.toEntity()
 
+            // Extraemos los IDs del chatId (asumiendo formato "ID1_ID2")
+            val userIds = chatId.split("_")
+
+            // Preparamos los datos del chat para que sea visible en la lista
+            val chatData = mapOf(
+                "id" to chatId,
+                "userIds" to userIds,
+                "lastMessage" to message.text, // USANDO .text SEGÚN TU MODELO
+                "timestamp" to message.timestamp.toString() // Firebase prefiere String o Date
+            )
+
+            // 1. Asegurar que el documento del chat existe
+            firestore.collection("chats")
+                .document(chatId)
+                .set(chatData, SetOptions.merge())
+                .await()
+
+            // 2. Guardar el mensaje en la subcolección
             firestore.collection("chats")
                 .document(chatId)
                 .collection("messages")
