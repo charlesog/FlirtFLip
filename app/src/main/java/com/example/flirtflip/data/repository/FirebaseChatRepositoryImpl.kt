@@ -42,25 +42,51 @@ class FirebaseChatRepositoryImpl @Inject constructor(
     override suspend fun sendMessage(chatId: String, message: Message): Result<Unit> {
         return try {
             val messageEntity = message.toEntity()
-
-            // Extraemos los IDs del chatId (asumiendo formato "ID1_ID2")
             val userIds = chatId.split("_")
 
-            // Preparamos los datos del chat para que sea visible en la lista
-            val chatData = mapOf(
+            // Identificamos el ID de la otra persona (el que NO es el emisor actual)
+            val otherUserId = userIds.firstOrNull { it != message.senderId } ?: ""
+
+            // Buscamos el nombre real de esa persona en la colección "users" de tu Firebase
+            var realName = ""
+            if (otherUserId.isNotBlank()) {
+                try {
+                    val userSnapshot = firestore.collection("users")
+                        .document(otherUserId)
+                        .get()
+                        .await()
+
+                    // Intenta buscar "name" o "profile.name" según tu estructura en Firebase
+                    realName = userSnapshot.getString("name")
+                        ?: userSnapshot.getString("profile.name")
+                                ?: ""
+                } catch (e: Exception) {
+                    // Si falla, permitimos que continúe para no congelar la app
+                }
+            }
+
+            // Estructuramos los datos EXACTOS que requiere tu base de datos y modelo
+            val chatData = mutableMapOf(
                 "id" to chatId,
                 "userIds" to userIds,
-                "lastMessage" to message.text, // USANDO .text SEGÚN TU MODELO
-                "timestamp" to message.timestamp.toString() // Firebase prefiere String o Date
+                "lastMessage" to message.text,
+                "lastMessageTimestamp" to System.currentTimeMillis(),
+                "lastMessageSenderId" to message.senderId, // <-- CLAVE: Guardamos quién mandó el mensaje
+                "isActive" to true
             )
 
-            // 1. Asegurar que el documento del chat existe
+            // Solo sobreescribimos el nombre si logramos recuperar uno válido de la base de datos
+            if (realName.isNotBlank()) {
+                chatData["otherUserName"] = realName
+            }
+
+            // 1. Crear o fusionar los datos del chat raíz
             firestore.collection("chats")
                 .document(chatId)
                 .set(chatData, SetOptions.merge())
                 .await()
 
-            // 2. Guardar el mensaje en la subcolección
+            // 2. Guardar el mensaje en la subcolección interna
             firestore.collection("chats")
                 .document(chatId)
                 .collection("messages")
@@ -83,5 +109,28 @@ class FirebaseChatRepositoryImpl @Inject constructor(
                 trySend(chats)
             }
         awaitClose { subscription.remove() }
+    }
+
+    override suspend fun deleteMessage(chatId: String, messageId: String): Result<Unit> {
+        return try {
+            val querySnapshot = firestore.collection("chats")
+                .document(chatId)
+                .collection("messages")
+                .whereEqualTo("id", messageId)
+                .get()
+                .await()
+
+            for (document in querySnapshot.documents) {
+                firestore.collection("chats")
+                    .document(chatId)
+                    .collection("messages")
+                    .document(document.id)
+                    .delete()
+                    .await()
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

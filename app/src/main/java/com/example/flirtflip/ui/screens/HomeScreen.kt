@@ -57,7 +57,10 @@ fun HomeScreen(
                 HomeTopBar()
 
                 Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = Spacing.medium),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = Spacing.medium),
                     contentAlignment = Alignment.Center
                 ) {
                     when (val state = uiState) {
@@ -67,18 +70,29 @@ fun HomeScreen(
                             if (state.profiles.isNotEmpty()) {
                                 val currentUser = state.profiles[state.currentIndex]
 
+                                // Capa trasera (Siguiente perfil)
                                 if (state.currentIndex + 1 < state.profiles.size) {
                                     ProfileCard(
                                         user = state.profiles[state.currentIndex + 1],
-                                        modifier = Modifier.fillMaxWidth().height(520.dp).padding(Spacing.medium)
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(520.dp)
+                                            .padding(Spacing.medium)
                                     )
                                 }
 
-                                ProfileCard(user = currentUser, modifier = Modifier.fillMaxWidth().height(520.dp))
+                                // Capa delantera (Perfil actual listo para swipear)
+                                ProfileCard(
+                                    user = currentUser,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(520.dp)
+                                )
                             } else if (!state.showMatchDialog) {
                                 NoMoreProfilesCard()
                             }
 
+                            // Diálogo flotante cuando ocurre un Match de forma nativa
                             if (state.showMatchDialog && state.matchedUser != null) {
                                 MatchDialog(
                                     matchedUser = state.matchedUser,
@@ -88,11 +102,8 @@ fun HomeScreen(
                                         val otherId = state.matchedUser.id
 
                                         if (myId != null) {
-                                            // Generar chatId consistente (puedes usar esta lógica o dejar que el Repo lo gestione)
                                             val chatId = listOfNotNull(myId, otherId).sorted().joinToString("_")
-
                                             viewModel.dismissMatchDialog()
-                                            // CORRECCIÓN: El diálogo de Match va directo al DETALLE
                                             onNavigateToChatDetail(chatId)
                                         }
                                     }
@@ -104,9 +115,10 @@ fun HomeScreen(
                     }
                 }
 
-                if (uiState is SwipeUiState.Success && (uiState as SwipeUiState.Success).profiles.isNotEmpty()) {
-                    val success = uiState as SwipeUiState.Success
-                    val current = success.profiles[success.currentIndex]
+                // Renderizado seguro de botones de acción usando Smart Casting de Kotlin
+                val currentState = uiState
+                if (currentState is SwipeUiState.Success && currentState.profiles.isNotEmpty()) {
+                    val current = currentState.profiles[currentState.currentIndex]
                     SwipeActionButtons(
                         onDislike = { viewModel.onSwipe(current, false) },
                         onLike = { viewModel.onSwipe(current, true) },
@@ -119,7 +131,6 @@ fun HomeScreen(
         }
     }
 }
-
 
 @Composable
 private fun MatchDialog(matchedUser: User, onDismiss: () -> Unit, onSendMessage: () -> Unit) {
@@ -148,21 +159,54 @@ private fun ProfileCard(user: User, modifier: Modifier = Modifier) {
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFFFFE4F0), Color(0xFFFFD6EC))))) {
-                Icon(Icons.Default.Person, null, modifier = Modifier.size(100.dp).align(Alignment.Center), tint = primary.copy(0.4f))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Brush.linearGradient(listOf(Color(0xFFFFE4F0), Color(0xFFFFD6EC))))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(100.dp).align(Alignment.Center),
+                    tint = primary.copy(alpha = 0.4f)
+                )
             }
-            Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.6f).align(Alignment.BottomCenter).background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.7f)))))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.6f)
+                    .align(Alignment.BottomCenter)
+                    .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))))
+            )
             Column(modifier = Modifier.align(Alignment.BottomStart).padding(Spacing.large)) {
-                Text("${user.profile.name}, ${user.profile.age}", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
-                Text(user.profile.bio, color = Color.White.copy(0.8f), fontSize = 14.sp, maxLines = 2)
+                Text(
+                    text = "${user.profile.name}, ${user.profile.age}",
+                    color = Color.White,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    text = user.profile.bio,
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    maxLines = 2
+                )
             }
         }
     }
 }
 
 @Composable
-private fun SwipeActionButtons(onDislike: () -> Unit, onSuperLike: () -> Unit, onLike: () -> Unit, onBoost: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.extraLarge), horizontalArrangement = Arrangement.SpaceEvenly) {
+private fun SwipeActionButtons(
+    onDislike: () -> Unit,
+    onSuperLike: () -> Unit,
+    onLike: () -> Unit,
+    onBoost: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.extraLarge),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
         ActionButton(Icons.Default.Close, error, errorContainer, 60.dp, onDislike)
         ActionButton(Icons.Default.StarRate, superLikeBlue, Color(0xFFE3F2FD), 52.dp, onSuperLike)
         ActionButton(Icons.Default.Favorite, matchColor, secondaryContainer, 60.dp, onLike)
@@ -171,9 +215,21 @@ private fun SwipeActionButtons(onDislike: () -> Unit, onSuperLike: () -> Unit, o
 }
 
 @Composable
-private fun ActionButton(icon: ImageVector, tint: Color, background: Color, size: Dp, onClick: () -> Unit) {
+private fun ActionButton(
+    icon: ImageVector,
+    tint: Color,
+    background: Color,
+    size: Dp,
+    onClick: () -> Unit
+) {
     IconButton(onClick = onClick, modifier = Modifier.size(size)) {
-        Box(modifier = Modifier.fillMaxSize().shadow(6.dp, CircleShape).background(background, CircleShape), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .shadow(6.dp, CircleShape)
+                .background(background, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
             Icon(icon, null, tint = tint, modifier = Modifier.size(size * 0.45f))
         }
     }
@@ -181,7 +237,11 @@ private fun ActionButton(icon: ImageVector, tint: Color, background: Color, size
 
 @Composable
 private fun NoMoreProfilesCard() {
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         Icon(Icons.Default.SearchOff, null, modifier = Modifier.size(80.dp), tint = primary)
         Text("¡No hay más perfiles por ahora!", fontWeight = FontWeight.Bold)
     }
@@ -190,7 +250,9 @@ private fun NoMoreProfilesCard() {
 @Composable
 private fun HomeTopBar() {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.small),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.medium, vertical = Spacing.small),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

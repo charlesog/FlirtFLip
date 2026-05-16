@@ -17,7 +17,9 @@ fun ChatEntity.toDomain(): Chat {
                 ZoneId.systemDefault()
             )
         },
-        isActive = this.isActive
+        isActive = this.isActive,
+        otherUserName = "",
+        otherUserProfileUrl = ""
     )
 }
 

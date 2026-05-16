@@ -45,4 +45,10 @@ class ChatDetailViewModel @Inject constructor(
             chatRepository.sendMessage(chatId, newMessage)
         }
     }
+
+    fun deleteMessage(messageId: String) {
+        viewModelScope.launch {
+            chatRepository.deleteMessage(chatId, messageId)
+        }
+    }
 }
