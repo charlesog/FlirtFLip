@@ -7,10 +7,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.flirtflip.ui.screens.*
+import com.example.flirtflip.ui.theme.ThemePreference
 
-/**
- * Definición de las rutas de la aplicación.
- */
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object SignUp : Screen("signup")
@@ -19,10 +17,14 @@ sealed class Screen(val route: String) {
     object ProfileEdit : Screen("profile_edit")
     object ChatList : Screen("chat_list")
     object ChatDetail : Screen("chat_detail/{chatId}")
+    object Legal : Screen("legal")
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    themePreference: ThemePreference,
+    onThemeChange: (ThemePreference) -> Unit
+) {
     val navController = rememberNavController()
 
     NavHost(
@@ -30,12 +32,10 @@ fun AppNavigation() {
         startDestination = Screen.Login.route
     ) {
 
-        // --- PANTALLA DE LOGIN ---
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToHome = {
                     navController.navigate(Screen.Home.route) {
-                        // Limpiamos el stack para que no se pueda volver al login con el botón atrás
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -62,10 +62,11 @@ fun AppNavigation() {
             // TODO: Implementar CompleteProfileScreen
         }
 
-        // --- PANTALLA PRINCIPAL (SWIPE) ---
         composable(Screen.Home.route) {
             HomeScreen(
-                onNavigateToMatches = { /* TODO: Implementar pantalla de matches */ },
+                themePreference = themePreference,
+                onThemeChange = onThemeChange,
+                onNavigateToMatches = {},
                 onNavigateToChatList = {
                     navController.navigate(Screen.ChatList.route)
                 },
@@ -82,6 +83,9 @@ fun AppNavigation() {
             ChatListScreen(
                 onChatClick = { chatId ->
                     navController.navigate("chat_detail/$chatId")
+                },
+                onNavigateBack = {
+                    navController.navigateUp()
                 }
             )
         }
@@ -101,6 +105,19 @@ fun AppNavigation() {
 
         composable(Screen.ProfileEdit.route) {
             ProfileEditScreen(
+                themePreference = themePreference,
+                onThemeChange = onThemeChange,
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToLegal = {
+                    navController.navigate(Screen.Legal.route)
+                }
+            )
+        }
+
+        composable(Screen.Legal.route) {
+            LegalScreen(
                 onNavigateBack = {
                     navController.navigateUp()
                 }

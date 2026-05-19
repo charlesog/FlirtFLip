@@ -1,50 +1,86 @@
 package com.example.flirtflip.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.flirtflip.domain.model.Chat
-import com.example.flirtflip.ui.theme.primary
+import com.example.flirtflip.ui.theme.*
 import com.example.flirtflip.ui.viewmodel.ChatListViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatListScreen(
     onChatClick: (String) -> Unit,
+    onNavigateBack: () -> Unit = {},
     viewModel: ChatListViewModel = hiltViewModel()
 ) {
     val chats by viewModel.chatSummaries.collectAsState()
 
     Scaffold(
         topBar = {
-            Text(
-                "Mis Mensajes",
-                modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.ExtraBold
+            TopAppBar(
+                title = {
+                    Text(
+                        "Mensajes",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp,
+                        color = primary
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = primary
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
-        }
+        },
+        containerColor = softPinkSurface
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(listOf(Color(0xFFFFF0F7), Color(0xFFFFE4F0)))
+                )
+                .padding(paddingValues)
+        ) {
             if (chats.isEmpty()) {
                 EmptyChatsView()
             } else {
-                LazyColumn {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(chats) { chat ->
                         ChatItem(chat = chat, onClick = { onChatClick(chat.id) })
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = Spacing.medium),
+                            color = surfaceVariant.copy(alpha = 0.5f),
+                            thickness = 0.5.dp
+                        )
                     }
                 }
             }
@@ -58,30 +94,41 @@ fun ChatItem(chat: Chat, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(16.dp),
+            .padding(horizontal = Spacing.medium, vertical = Spacing.small),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Círculo para la foto (puedes usar AsyncImage de Coil después)
-        Surface(
-            modifier = Modifier.size(55.dp).clip(CircleShape),
-            color = Color.LightGray.copy(alpha = 0.3f)
+        // Avatar placeholder
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(
+                    Brush.linearGradient(listOf(primaryContainer, secondaryContainer))
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            // Aquí iría la imagen del usuario
+            Icon(
+                Icons.Default.Person,
+                contentDescription = null,
+                tint = primary,
+                modifier = Modifier.size(28.dp)
+            )
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Spacing.medium))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = chat.otherUserName,
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = chat.lastMessage ?: "¡Has hecho un match! Di hola...",
                 maxLines = 1,
-                color = Color.Gray,
-                fontSize = 14.sp
+                color = onSurfaceVariant,
+                fontSize = 13.sp
             )
         }
     }
@@ -98,10 +145,10 @@ fun EmptyChatsView() {
             Icons.Default.ChatBubbleOutline,
             contentDescription = null,
             modifier = Modifier.size(80.dp),
-            tint = primary.copy(alpha = 0.5f)
+            tint = primary.copy(alpha = 0.4f)
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Aún no tienes chats.", fontWeight = FontWeight.Bold)
-        Text("¡Sigue deslizando para conocer gente!", color = Color.Gray)
+        Spacer(modifier = Modifier.height(Spacing.medium))
+        Text("Aún no tienes chats.", fontWeight = FontWeight.Bold, color = onBackground)
+        Text("¡Sigue deslizando para conocer gente!", color = onSurfaceVariant, fontSize = 14.sp)
     }
 }
