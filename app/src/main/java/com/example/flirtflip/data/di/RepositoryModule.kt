@@ -1,8 +1,8 @@
 package com.example.flirtflip.data.di
 
+import com.example.flirtflip.data.repository.CloudinaryImageRepositoryImpl
 import com.example.flirtflip.data.repository.FirebaseAuthRepositoryImpl
 import com.example.flirtflip.data.repository.FirebaseChatRepositoryImpl
-import com.example.flirtflip.data.repository.FirebaseImageRepositoryImpl
 import com.example.flirtflip.data.repository.FirebaseMatchRepositoryImpl
 import com.example.flirtflip.data.repository.FirebaseUserRepositoryImpl
 import com.example.flirtflip.data.repository.FusedLocationRepositoryImpl
@@ -22,13 +22,13 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-    
+
     @Binds
     @Singleton
     abstract fun bindAuthRepository(
         authRepositoryImpl: FirebaseAuthRepositoryImpl
     ): AuthRepository
-    
+
     @Binds
     @Singleton
     abstract fun bindUserRepository(
@@ -50,7 +50,7 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindImageRepository(
-        imageRepositoryImpl: FirebaseImageRepositoryImpl
+        imageRepositoryImpl: CloudinaryImageRepositoryImpl
     ): ImageRepository
 
     @Binds

@@ -57,21 +57,21 @@ android {
 dependencies {
     // --- SEGURIDAD Y CORRUTINAS ---
     implementation("org.mindrot:jbcrypt:0.4")
-    // Imprescindible para el .await() en Firebase y GPS
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
-    implementation("com.google.android.gms:play-services-location:21.2.0")
 
-    // --- FIREBASE (Usando BoM para evitar errores de versión) ---
-    // El BoM gestiona las versiones de Auth, Firestore y Storage automáticamente
+    // --- FIREBASE (BoM gestiona versiones) ---
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
 
-    // --- HILT (Inyección de dependencias) ---
+    // --- HILT ---
     implementation("com.google.dagger:hilt-android:2.51.1")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // --- DATASTORE ---
+    implementation(libs.androidx.datastore.preferences)
 
     // --- COMPOSE BoM ---
     implementation(platform("androidx.compose:compose-bom:2024.10.00"))
@@ -90,6 +90,9 @@ dependencies {
     // --- IMÁGENES ---
     implementation("io.coil-kt:coil-compose:2.6.0")
 
+    // --- GPS ---
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+
     // --- ANDROIDX BASE ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -107,6 +110,4 @@ dependencies {
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-    implementation("com.google.android.gms:play-services-location:21.2.0")
 }

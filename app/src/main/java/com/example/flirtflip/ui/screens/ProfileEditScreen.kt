@@ -1,5 +1,6 @@
 package com.example.flirtflip.ui.screens
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -43,21 +45,34 @@ import com.example.flirtflip.ui.viewmodel.ProfileEditViewModel
 @Composable
 fun ProfileEditScreen(
     viewModel: ProfileEditViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit = {}
+    themePreference: ThemePreference,
+    onThemeChange: (ThemePreference) -> Unit,
+    onNavigateBack: () -> Unit = {},
+    onNavigateToLegal: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    
+
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.onMainPhotoSelected(it.toString()) }
+        uri?.let {
+            context.contentResolver.takePersistableUriPermission(
+                it, Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            viewModel.onMainPhotoSelected(it.toString())
+        }
     }
 
     val galleryPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.onGalleryPhotoAdded(it.toString()) }
+        uri?.let {
+            context.contentResolver.takePersistableUriPermission(
+                it, Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            viewModel.onGalleryPhotoAdded(it.toString())
+        }
     }
 
     Scaffold(
@@ -93,7 +108,7 @@ fun ProfileEditScreen(
                 viewModel.errorMessage?.let { error ->
                     ErrorMessage(error) { viewModel.errorMessage = null }
                 }
-                
+
                 viewModel.successMessage?.let { success ->
                     SuccessMessage(success) { viewModel.successMessage = null }
                 }
@@ -212,6 +227,36 @@ fun ProfileEditScreen(
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.extraLarge))
+
+                // ── AJUSTES ──────────────────────────────────────────────
+                SectionTitle("Ajustes")
+                Spacer(modifier = Modifier.height(Spacing.small))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column {
+                        // Selector de tema
+                        ThemeSelector(
+                            themePreference = themePreference,
+                            onThemeChange = onThemeChange
+                        )
+
+                        HorizontalDivider(color = surfaceVariant, thickness = 0.5.dp)
+
+                        // Aviso legal / Privacidad
+                        SettingsRow(
+                            icon = Icons.Default.Gavel,
+                            label = "Información Legal",
+                            onClick = onNavigateToLegal
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(Spacing.extraLarge))
             }
 
             // Loading overlay
@@ -228,6 +273,138 @@ fun ProfileEditScreen(
         }
     }
 }
+
+// ── Componentes de Ajustes ────────────────────────────────────────────────────
+
+@Composable
+private fun ThemeSelector(
+    themePreference: ThemePreference,
+    onThemeChange: (ThemePreference) -> Unit
+) {
+    Column(modifier = Modifier.padding(Spacing.medium)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Palette,
+                contentDescription = null,
+                tint = primary,
+                modifier = Modifier.size(22.dp)
+            )
+            Spacer(modifier = Modifier.width(Spacing.small))
+            Text(
+                text = "Tema",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = onBackground
+            )
+        }
+        Spacer(modifier = Modifier.height(Spacing.small))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.small)
+        ) {
+            ThemeOptionChip(
+                label = "Claro",
+                icon = Icons.Default.LightMode,
+                selected = themePreference == ThemePreference.LIGHT,
+                onClick = { onThemeChange(ThemePreference.LIGHT) },
+                modifier = Modifier.weight(1f)
+            )
+            ThemeOptionChip(
+                label = "Oscuro",
+                icon = Icons.Default.DarkMode,
+                selected = themePreference == ThemePreference.DARK,
+                onClick = { onThemeChange(ThemePreference.DARK) },
+                modifier = Modifier.weight(1f)
+            )
+            ThemeOptionChip(
+                label = "Sistema",
+                icon = Icons.Default.SettingsBrightness,
+                selected = themePreference == ThemePreference.SYSTEM,
+                onClick = { onThemeChange(ThemePreference.SYSTEM) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThemeOptionChip(
+    label: String,
+    icon: ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = if (selected) primary.copy(alpha = 0.12f) else Color.Transparent,
+        border = BorderStroke(
+            width = if (selected) 2.dp else 1.dp,
+            color = if (selected) primary else onSurfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = if (selected) primary else onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                color = if (selected) primary else onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsRow(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = Spacing.medium, vertical = Spacing.medium),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = primary,
+            modifier = Modifier.size(22.dp)
+        )
+        Spacer(modifier = Modifier.width(Spacing.small))
+        Text(
+            text = label,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Medium,
+            color = onBackground,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+// ── Componentes originales ────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -286,10 +463,7 @@ private fun MainPhotoSection(
                 .clip(CircleShape)
                 .background(
                     Brush.linearGradient(
-                        colors = listOf(
-                            primaryContainer,
-                            secondaryContainer
-                        )
+                        colors = listOf(primaryContainer, secondaryContainer)
                     )
                 )
                 .clickable { onPhotoClick() },
@@ -303,7 +477,6 @@ private fun MainPhotoSection(
                     tint = primary
                 )
             } else {
-                // Mostrar la imagen real con Coil
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(photoUri)
@@ -509,7 +682,6 @@ private fun GallerySection(
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(Spacing.small)
     ) {
-        // Botón para añadir foto
         item {
             Box(
                 modifier = Modifier
@@ -524,9 +696,7 @@ private fun GallerySection(
                     .clickable { if (galleryUris.size < 5) onAddPhoto() },
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         Icons.Default.Add,
                         contentDescription = "Añadir foto",
@@ -543,12 +713,8 @@ private fun GallerySection(
             }
         }
 
-        // Fotos existentes
         items(galleryUris) { uri ->
-            Box(
-                modifier = Modifier.size(120.dp)
-            ) {
-                // Mostrar la imagen real con Coil
+            Box(modifier = Modifier.size(120.dp)) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(uri)
@@ -560,16 +726,11 @@ private fun GallerySection(
                         .clip(RoundedCornerShape(16.dp))
                         .background(
                             Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFFFFE4F0),
-                                    Color(0xFFFFF0F7)
-                                )
+                                colors = listOf(Color(0xFFFFE4F0), Color(0xFFFFF0F7))
                             )
                         ),
                     contentScale = ContentScale.Crop
                 )
-                
-                // Botón para eliminar
                 IconButton(
                     onClick = { onRemovePhoto(uri) },
                     modifier = Modifier
@@ -591,19 +752,14 @@ private fun GallerySection(
 }
 
 @Composable
-private fun ErrorMessage(
-    message: String,
-    onDismiss: () -> Unit
-) {
+private fun ErrorMessage(message: String, onDismiss: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = errorContainer),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.medium),
+            modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -612,42 +768,25 @@ private fun ErrorMessage(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.small),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    Icons.Default.Error,
-                    contentDescription = null,
-                    tint = error
-                )
-                Text(
-                    text = message,
-                    color = onErrorContainer,
-                    fontSize = 14.sp
-                )
+                Icon(Icons.Default.Error, contentDescription = null, tint = error)
+                Text(text = message, color = onErrorContainer, fontSize = 14.sp)
             }
             IconButton(onClick = onDismiss) {
-                Icon(
-                    Icons.Default.Close,
-                    contentDescription = "Cerrar",
-                    tint = error
-                )
+                Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = error)
             }
         }
     }
 }
 
 @Composable
-private fun SuccessMessage(
-    message: String,
-    onDismiss: () -> Unit
-) {
+private fun SuccessMessage(message: String, onDismiss: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.medium),
+            modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -656,37 +795,12 @@ private fun SuccessMessage(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.small),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = onlineGreen
-                )
-                Text(
-                    text = message,
-                    color = Color(0xFF1B5E20),
-                    fontSize = 14.sp
-                )
+                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = onlineGreen)
+                Text(text = message, color = Color(0xFF1B5E20), fontSize = 14.sp)
             }
             IconButton(onClick = onDismiss) {
-                Icon(
-                    Icons.Default.Close,
-                    contentDescription = "Cerrar",
-                    tint = onlineGreen
-                )
+                Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = onlineGreen)
             }
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
