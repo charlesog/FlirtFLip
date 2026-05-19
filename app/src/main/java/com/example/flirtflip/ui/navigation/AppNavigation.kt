@@ -64,8 +64,6 @@ fun AppNavigation(
 
         composable(Screen.Home.route) {
             HomeScreen(
-                themePreference = themePreference,
-                onThemeChange = onThemeChange,
                 onNavigateToMatches = {},
                 onNavigateToChatList = {
                     navController.navigate(Screen.ChatList.route)
@@ -80,12 +78,13 @@ fun AppNavigation(
         }
 
         composable(Screen.ChatList.route) {
+            // ACTUALIZADO: Ahora mapea correctamente los dos eventos que definimos en ChatListScreen
             ChatListScreen(
                 onChatClick = { chatId ->
                     navController.navigate("chat_detail/$chatId")
                 },
-                onNavigateBack = {
-                    navController.navigateUp()
+                onBack = {
+                    navController.navigateUp() // Te devuelve de forma segura a la HomeScreen
                 }
             )
         }

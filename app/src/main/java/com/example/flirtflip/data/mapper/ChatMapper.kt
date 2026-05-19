@@ -11,15 +11,13 @@ fun ChatEntity.toDomain(): Chat {
         id = this.id,
         userIds = this.userIds,
         lastMessage = this.lastMessage,
-        lastMessageTimestamp = this.lastMessageTimestamp?.let {
+        lastMessageTimestamp = this.lastMessageTimestamp?.let { epochMilli ->
             LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(it),
+                Instant.ofEpochMilli(epochMilli),
                 ZoneId.systemDefault()
             )
         },
-        isActive = this.isActive,
-        otherUserName = "",
-        otherUserProfileUrl = ""
+        isActive = this.isActive
     )
 }
 
@@ -28,9 +26,7 @@ fun Chat.toEntity(): ChatEntity {
         id = this.id,
         userIds = this.userIds,
         lastMessage = this.lastMessage,
-        lastMessageTimestamp = this.lastMessageTimestamp?.atZone(ZoneId.systemDefault())
-            ?.toInstant()
-            ?.toEpochMilli(),
+        lastMessageTimestamp = this.lastMessageTimestamp?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli(),
         isActive = this.isActive
     )
 }
