@@ -13,17 +13,19 @@ import com.example.flirtflip.ui.screens.LegalScreen
 import com.example.flirtflip.ui.screens.LoginScreen
 import com.example.flirtflip.ui.screens.ProfileEditScreen
 import com.example.flirtflip.ui.screens.SignUpScreen
+import com.example.flirtflip.ui.screens.WelcomeBotScreen
 import com.example.flirtflip.ui.theme.ThemePreference
 
 sealed class Screen(val route: String) {
-    object Login : Screen("login")
-    object SignUp : Screen("signup")
-    object CompleteProfile : Screen("complete_profile")
-    object Home : Screen("home")
-    object ProfileEdit : Screen("profile_edit")
-    object ChatList : Screen("chat_list")
-    object ChatDetail : Screen("chat_detail/{chatId}")
-    object Legal : Screen("legal")
+    object Login          : Screen("login")
+    object SignUp         : Screen("signup")
+    object WelcomeBot     : Screen("welcome_bot")
+    object CompleteProfile: Screen("complete_profile")
+    object Home           : Screen("home")
+    object ProfileEdit    : Screen("profile_edit")
+    object ChatList       : Screen("chat_list")
+    object ChatDetail     : Screen("chat_detail/{chatId}")
+    object Legal          : Screen("legal")
 }
 
 @Composable
@@ -38,10 +40,14 @@ fun AppNavigation(
         startDestination = Screen.Login.route
     ) {
 
+        // ── LOGIN ─────────────────────────────────────────────────────────
         composable(Screen.Login.route) {
             LoginScreen(
-                onNavigateToHome = {
-                    navController.navigate(Screen.Home.route) {
+                onNavigateToHome = { showWelcome ->
+                    // showWelcome = true  → primera vez, mostrar bot
+                    // showWelcome = false → ya lo vio antes, ir directo a Home
+                    val destination = if (showWelcome) Screen.WelcomeBot.route else Screen.Home.route
+                    navController.navigate(destination) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -51,9 +57,11 @@ fun AppNavigation(
             )
         }
 
+        // ── REGISTRO ──────────────────────────────────────────────────────
         composable(Screen.SignUp.route) {
             SignUpScreen(
                 onNavigateToProfile = {
+                    // Cuenta nueva → completar perfil
                     navController.navigate(Screen.CompleteProfile.route) {
                         popUpTo(Screen.SignUp.route) { inclusive = true }
                     }
@@ -64,16 +72,30 @@ fun AppNavigation(
             )
         }
 
+        // ── COMPLETAR PERFIL (cuenta nueva) ───────────────────────────────
         composable(Screen.CompleteProfile.route) {
             ProfileEditScreen(
                 onNavigateBack = {
-                    navController.navigate(Screen.Home.route) {
+                    // Siempre va al bot: es la primera vez seguro
+                    navController.navigate(Screen.WelcomeBot.route) {
                         popUpTo(Screen.CompleteProfile.route) { inclusive = true }
                     }
                 }
             )
         }
 
+        // ── BOT DE BIENVENIDA ─────────────────────────────────────────────
+        composable(Screen.WelcomeBot.route) {
+            WelcomeBotScreen(
+                onFinish = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.WelcomeBot.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // ── HOME ──────────────────────────────────────────────────────────
         composable(Screen.Home.route) {
             val currentEntry = it
             HomeScreen(
@@ -91,7 +113,7 @@ fun AppNavigation(
                 },
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
@@ -101,6 +123,7 @@ fun AppNavigation(
             )
         }
 
+        // ── CHAT LIST ─────────────────────────────────────────────────────
         composable(Screen.ChatList.route) {
             ChatListScreen(
                 onChatClick = { chatId ->
@@ -112,23 +135,20 @@ fun AppNavigation(
             )
         }
 
+        // ── CHAT DETAIL ───────────────────────────────────────────────────
         composable(
             route = Screen.ChatDetail.route,
-            arguments = listOf(
-                navArgument("chatId") { type = NavType.StringType }
-            )
+            arguments = listOf(navArgument("chatId") { type = NavType.StringType })
         ) {
             ChatDetailScreen(
-                onBack = {
-                    navController.navigateUp()
-                }
+                onBack = { navController.navigateUp() }
             )
         }
 
+        // ── EDITAR PERFIL (desde Home) ────────────────────────────────────
         composable(Screen.ProfileEdit.route) {
             ProfileEditScreen(
                 onNavigateBack = {
-                    // Señalamos a HomeScreen que vuelva a la pestaña de perfil y recargue
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("goToProfileTab", true)
@@ -137,11 +157,10 @@ fun AppNavigation(
             )
         }
 
+        // ── LEGAL ─────────────────────────────────────────────────────────
         composable(Screen.Legal.route) {
             LegalScreen(
-                onNavigateBack = {
-                    navController.navigateUp()
-                }
+                onNavigateBack = { navController.navigateUp() }
             )
         }
     }

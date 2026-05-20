@@ -73,7 +73,7 @@ import com.example.flirtflip.ui.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
-    onNavigateToHome: () -> Unit,
+    onNavigateToHome: (showWelcome: Boolean) -> Unit,
     onNavigateToSignUp: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
@@ -282,7 +282,7 @@ fun LoginScreen(
 
                         // Boton login
                         Button(
-                            onClick = { viewModel.onLoginClick(onSuccess = onNavigateToHome) },
+                            onClick = { viewModel.onLoginClick(onSuccess = { showWelcome -> onNavigateToHome(showWelcome) }) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(Dimensions.buttonHeight),

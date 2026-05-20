@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,10 +21,13 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class UserPreferences @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private val REMEMBER_ME_KEY = booleanPreferencesKey("remember_me")
-    private val SAVED_EMAIL_KEY = stringPreferencesKey("saved_email")
-    private val AGE_MIN_KEY = floatPreferencesKey("age_min")
-    private val AGE_MAX_KEY = floatPreferencesKey("age_max")
+    private val REMEMBER_ME_KEY  = booleanPreferencesKey("remember_me")
+    private val SAVED_EMAIL_KEY  = stringPreferencesKey("saved_email")
+    private val AGE_MIN_KEY      = floatPreferencesKey("age_min")
+    private val AGE_MAX_KEY      = floatPreferencesKey("age_max")
+
+    private fun welcomeSeenKey(userId: String) =
+        booleanPreferencesKey("welcome_seen_$userId")
 
     val rememberMe: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[REMEMBER_ME_KEY] ?: false
@@ -39,6 +43,18 @@ class UserPreferences @Inject constructor(
 
     val ageMax: Flow<Float> = context.dataStore.data.map { prefs ->
         prefs[AGE_MAX_KEY] ?: 50f
+    }
+
+    suspend fun hasSeenWelcome(userId: String): Boolean {
+        return context.dataStore.data.map { prefs ->
+            prefs[welcomeSeenKey(userId)] ?: false
+        }.first()
+    }
+
+    suspend fun markWelcomeSeen(userId: String) {
+        context.dataStore.edit { prefs ->
+            prefs[welcomeSeenKey(userId)] = true
+        }
     }
 
     suspend fun saveRememberMe(value: Boolean, email: String) {

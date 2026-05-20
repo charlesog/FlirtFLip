@@ -18,14 +18,13 @@ class LoginViewModel @Inject constructor(
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
-    var email       by mutableStateOf("")
-    var password    by mutableStateOf("")
-    var rememberMe  by mutableStateOf(false)
-    var isLoading   by mutableStateOf(false)
+    var email        by mutableStateOf("")
+    var password     by mutableStateOf("")
+    var rememberMe   by mutableStateOf(false)
+    var isLoading    by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
     init {
-        // Cargar preferencias guardadas al arrancar
         viewModelScope.launch {
             val savedRemember = userPreferences.rememberMe.first()
             val savedEmail    = userPreferences.savedEmail.first()
@@ -36,18 +35,23 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onLoginClick(onSuccess: () -> Unit) {
+    /**
+     * onSuccess recibe un booleano: true = ir al WelcomeBot, false = ir a Home
+     */
+    fun onLoginClick(onSuccess: (showWelcome: Boolean) -> Unit) {
         viewModelScope.launch {
-            isLoading = true
+            isLoading    = true
             errorMessage = null
 
             val result = authRepository.login(email, password)
 
             result.fold(
-                onSuccess = {
-                    // Guardar (o limpiar) preferencias según el checkbox
+                onSuccess = { uid ->
                     userPreferences.saveRememberMe(rememberMe, email)
-                    onSuccess()
+
+                    // Comprobamos si este usuario ya vio el bot de bienvenida
+                    val alreadySeen = userPreferences.hasSeenWelcome(uid)
+                    onSuccess(!alreadySeen)   // true = mostrar bot, false = saltar
                 },
                 onFailure = {
                     errorMessage = it.message ?: "Error al iniciar sesión"

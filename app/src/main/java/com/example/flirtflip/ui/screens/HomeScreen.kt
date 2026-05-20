@@ -106,6 +106,10 @@ import com.example.flirtflip.ui.viewmodel.MatchesViewModel
 import com.example.flirtflip.ui.viewmodel.ProfileViewModel
 import com.example.flirtflip.ui.viewmodel.SwipeUiState
 import com.example.flirtflip.ui.viewmodel.SwipeViewModel
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun HomeScreen(
@@ -190,8 +194,20 @@ private fun ExploreTab(
     onOpenPreferences: () -> Unit = {}
 ) {
     val myHobbies by viewModel.myHobbies.collectAsState()
+    var showNotifications by remember { mutableStateOf(false) }
+    // Simulamos notificaciones basadas en matches recientes
+    val hasNewNotifications by remember { mutableStateOf(true) }
+
+    if (showNotifications) {
+        NotificationsDialog(onDismiss = { showNotifications = false })
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
-        HomeTopBar(onOpenPreferences = onOpenPreferences)
+        HomeTopBar(
+            onOpenPreferences = onOpenPreferences,
+            onOpenNotifications = { showNotifications = true },
+            hasNewNotifications = hasNewNotifications
+        )
         Box(
             modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = Spacing.medium),
             contentAlignment = Alignment.Center
@@ -983,7 +999,11 @@ fun NoMoreProfilesCard() {
 }
 
 @Composable
-private fun HomeTopBar(onOpenPreferences: () -> Unit = {}) {
+private fun HomeTopBar(
+    onOpenPreferences: () -> Unit = {},
+    onOpenNotifications: () -> Unit = {},
+    hasNewNotifications: Boolean = false
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.small),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -993,8 +1013,110 @@ private fun HomeTopBar(onOpenPreferences: () -> Unit = {}) {
             Icon(Icons.Default.Tune, "Preferencias", tint = primary)
         }
         Text("FlirtFlip", color = primary, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-        IconButton(onClick = { }) {
-            Icon(Icons.Default.Notifications, "Notis", tint = primary)
+        Box {
+            IconButton(onClick = onOpenNotifications) {
+                Icon(
+                    imageVector = if (hasNewNotifications) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone,
+                    contentDescription = "Notificaciones",
+                    tint = primary
+                )
+            }
+            if (hasNewNotifications) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .background(androidx.compose.ui.graphics.Color(0xFFFF4081), CircleShape)
+                        .align(Alignment.TopEnd)
+                        .padding(1.dp)
+                )
+            }
+        }
+    }
+}
+
+// ─── Panel de Notificaciones ─────────────────────────────────────────────────
+
+private data class AppNotification(
+    val icon: String,
+    val title: String,
+    val body: String,
+    val time: String
+)
+
+private val sampleNotifications = listOf(
+    AppNotification("❤️", "¡Nuevo Match!", "Has hecho match con alguien. ¡Envíale un mensaje!", "Hace 2 min"),
+    AppNotification("💬", "Mensaje nuevo", "Tienes un mensaje sin leer en tus chats.", "Hace 15 min"),
+    AppNotification("⭐", "Super Like recibido", "Alguien te ha dado un Super Like. ¡Revísalo!", "Hace 1 h"),
+    AppNotification("🔥", "Completa tu perfil", "Los perfiles completos reciben 3x más matches.", "Hace 3 h"),
+)
+
+@Composable
+private fun NotificationsDialog(onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = androidx.compose.ui.graphics.Color.White,
+            shadowElevation = 8.dp
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Notificaciones",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp,
+                        color = primary
+                    )
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Close, null, tint = onSurfaceVariant)
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                sampleNotifications.forEach { notif ->
+                    NotificationItem(notif)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    "Las notificaciones en tiempo real se activan automáticamente al recibir matches o mensajes.",
+                    fontSize = 11.sp,
+                    color = onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NotificationItem(notif: AppNotification) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color(0xFFFFF0F7)),
+        elevation = CardDefaults.cardElevation(0.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(notif.icon, fontSize = 26.sp)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(notif.title, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = onBackground)
+                Text(notif.body, fontSize = 12.sp, color = onSurfaceVariant, lineHeight = 17.sp)
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(notif.time, fontSize = 10.sp, color = onSurfaceVariant)
         }
     }
 }
