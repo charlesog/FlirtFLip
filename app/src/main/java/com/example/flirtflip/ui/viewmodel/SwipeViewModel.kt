@@ -2,6 +2,7 @@ package com.example.flirtflip.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.flirtflip.domain.model.Hobby
 import com.example.flirtflip.domain.model.User
 import com.example.flirtflip.domain.repository.AuthRepository
 import com.example.flirtflip.domain.repository.UserRepository
@@ -24,6 +25,9 @@ class SwipeViewModel @Inject constructor(
 
     val currentUserId: String? get() = authRepository.currentUserId
 
+    private val _myHobbies = MutableStateFlow<List<Hobby>>(emptyList())
+    val myHobbies = _myHobbies.asStateFlow()
+
     init {
         loadUsers()
     }
@@ -32,6 +36,11 @@ class SwipeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = SwipeUiState.Loading
             val myId = currentUserId ?: return@launch
+
+            // Cargar hobbies del usuario actual
+            userRepository.getUser(myId)?.let { me ->
+                _myHobbies.value = me.profile.hobbies
+            }
 
             val allUserResult = userRepository.getAllUsers()
             val interactedUserIdsResult = userRepository.getInteractedUserIds(myId)

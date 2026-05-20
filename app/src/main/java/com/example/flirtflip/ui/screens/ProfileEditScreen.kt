@@ -8,7 +8,17 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -19,9 +29,37 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,17 +76,25 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.flirtflip.domain.model.Gender
 import com.example.flirtflip.domain.model.Hobby
-import com.example.flirtflip.ui.theme.*
+import com.example.flirtflip.ui.theme.Spacing
+import com.example.flirtflip.ui.theme.error
+import com.example.flirtflip.ui.theme.errorContainer
+import com.example.flirtflip.ui.theme.onBackground
+import com.example.flirtflip.ui.theme.onErrorContainer
+import com.example.flirtflip.ui.theme.onSurface
+import com.example.flirtflip.ui.theme.onSurfaceVariant
+import com.example.flirtflip.ui.theme.onlineGreen
+import com.example.flirtflip.ui.theme.primary
+import com.example.flirtflip.ui.theme.primaryContainer
+import com.example.flirtflip.ui.theme.secondaryContainer
+import com.example.flirtflip.ui.theme.softPinkSurface
 import com.example.flirtflip.ui.viewmodel.ProfileEditViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileEditScreen(
     viewModel: ProfileEditViewModel = hiltViewModel(),
-    themePreference: ThemePreference,
-    onThemeChange: (ThemePreference) -> Unit,
-    onNavigateBack: () -> Unit = {},
-    onNavigateToLegal: () -> Unit = {}
+    onNavigateBack: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -78,6 +124,7 @@ fun ProfileEditScreen(
     Scaffold(
         topBar = {
             ProfileEditTopBar(
+                title = if (viewModel.isCreatingProfile) "Crear perfil" else "Editar perfil",
                 onNavigateBack = onNavigateBack,
                 onSave = { viewModel.onSaveProfile(context, onNavigateBack) },
                 isLoading = viewModel.isLoading
@@ -232,30 +279,6 @@ fun ProfileEditScreen(
                 SectionTitle("Ajustes")
                 Spacer(modifier = Modifier.height(Spacing.small))
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column {
-                        // Selector de tema
-                        ThemeSelector(
-                            themePreference = themePreference,
-                            onThemeChange = onThemeChange
-                        )
-
-                        HorizontalDivider(color = surfaceVariant, thickness = 0.5.dp)
-
-                        // Aviso legal / Privacidad
-                        SettingsRow(
-                            icon = Icons.Default.Gavel,
-                            label = "Información Legal",
-                            onClick = onNavigateToLegal
-                        )
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(Spacing.extraLarge))
             }
 
@@ -270,100 +293,6 @@ fun ProfileEditScreen(
                     CircularProgressIndicator(color = primary)
                 }
             }
-        }
-    }
-}
-
-// ── Componentes de Ajustes ────────────────────────────────────────────────────
-
-@Composable
-private fun ThemeSelector(
-    themePreference: ThemePreference,
-    onThemeChange: (ThemePreference) -> Unit
-) {
-    Column(modifier = Modifier.padding(Spacing.medium)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Default.Palette,
-                contentDescription = null,
-                tint = primary,
-                modifier = Modifier.size(22.dp)
-            )
-            Spacer(modifier = Modifier.width(Spacing.small))
-            Text(
-                text = "Tema",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
-                color = onBackground
-            )
-        }
-        Spacer(modifier = Modifier.height(Spacing.small))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.small)
-        ) {
-            ThemeOptionChip(
-                label = "Claro",
-                icon = Icons.Default.LightMode,
-                selected = themePreference == ThemePreference.LIGHT,
-                onClick = { onThemeChange(ThemePreference.LIGHT) },
-                modifier = Modifier.weight(1f)
-            )
-            ThemeOptionChip(
-                label = "Oscuro",
-                icon = Icons.Default.DarkMode,
-                selected = themePreference == ThemePreference.DARK,
-                onClick = { onThemeChange(ThemePreference.DARK) },
-                modifier = Modifier.weight(1f)
-            )
-            ThemeOptionChip(
-                label = "Sistema",
-                icon = Icons.Default.SettingsBrightness,
-                selected = themePreference == ThemePreference.SYSTEM,
-                onClick = { onThemeChange(ThemePreference.SYSTEM) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun ThemeOptionChip(
-    label: String,
-    icon: ImageVector,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        color = if (selected) primary.copy(alpha = 0.12f) else Color.Transparent,
-        border = BorderStroke(
-            width = if (selected) 2.dp else 1.dp,
-            color = if (selected) primary else onSurfaceVariant.copy(alpha = 0.3f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = if (selected) primary else onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = label,
-                fontSize = 12.sp,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                color = if (selected) primary else onSurfaceVariant
-            )
         }
     }
 }
@@ -409,6 +338,7 @@ private fun SettingsRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileEditTopBar(
+    title: String,
     onNavigateBack: () -> Unit,
     onSave: () -> Unit,
     isLoading: Boolean
@@ -416,7 +346,7 @@ private fun ProfileEditTopBar(
     TopAppBar(
         title = {
             Text(
-                "Editar Perfil",
+                title,
                 fontWeight = FontWeight.Bold,
                 color = primary
             )

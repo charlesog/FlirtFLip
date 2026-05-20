@@ -1,12 +1,18 @@
 package com.example.flirtflip.ui.navigation
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.flirtflip.ui.screens.*
+import com.example.flirtflip.ui.screens.ChatDetailScreen
+import com.example.flirtflip.ui.screens.ChatListScreen
+import com.example.flirtflip.ui.screens.HomeScreen
+import com.example.flirtflip.ui.screens.LegalScreen
+import com.example.flirtflip.ui.screens.LoginScreen
+import com.example.flirtflip.ui.screens.ProfileEditScreen
+import com.example.flirtflip.ui.screens.SignUpScreen
 import com.example.flirtflip.ui.theme.ThemePreference
 
 sealed class Screen(val route: String) {
@@ -59,12 +65,18 @@ fun AppNavigation(
         }
 
         composable(Screen.CompleteProfile.route) {
-            // TODO: Implementar CompleteProfileScreen
+            ProfileEditScreen(
+                onNavigateBack = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.CompleteProfile.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(Screen.Home.route) {
+            val currentEntry = it
             HomeScreen(
-                onNavigateToMatches = {},
                 onNavigateToChatList = {
                     navController.navigate(Screen.ChatList.route)
                 },
@@ -73,18 +85,29 @@ fun AppNavigation(
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.ProfileEdit.route)
-                }
+                },
+                onNavigateToLegal = {
+                    navController.navigate(Screen.Legal.route)
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                // Leemos la señal de "volver al perfil" desde el savedStateHandle
+                savedStateHandle = currentEntry.savedStateHandle,
+                themePreference = themePreference,
+                onThemeChange = onThemeChange
             )
         }
 
         composable(Screen.ChatList.route) {
-            // ACTUALIZADO: Ahora mapea correctamente los dos eventos que definimos en ChatListScreen
             ChatListScreen(
                 onChatClick = { chatId ->
                     navController.navigate("chat_detail/$chatId")
                 },
                 onBack = {
-                    navController.navigateUp() // Te devuelve de forma segura a la HomeScreen
+                    navController.navigateUp()
                 }
             )
         }
@@ -104,13 +127,12 @@ fun AppNavigation(
 
         composable(Screen.ProfileEdit.route) {
             ProfileEditScreen(
-                themePreference = themePreference,
-                onThemeChange = onThemeChange,
                 onNavigateBack = {
+                    // Señalamos a HomeScreen que vuelva a la pestaña de perfil y recargue
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("goToProfileTab", true)
                     navController.navigateUp()
-                },
-                onNavigateToLegal = {
-                    navController.navigate(Screen.Legal.route)
                 }
             )
         }

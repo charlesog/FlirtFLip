@@ -38,7 +38,8 @@ class ProfileEditViewModel @Inject constructor(
     var selectedHobbies by mutableStateOf<List<Hobby>>(emptyList())
     var mainPhotoUri by mutableStateOf<String?>(null)
     var galleryPhotoUris by mutableStateOf<List<String>>(emptyList())
-    
+
+    var isCreatingProfile by mutableStateOf(true)
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
     var successMessage by mutableStateOf<String?>(null)
@@ -67,6 +68,7 @@ class ProfileEditViewModel @Inject constructor(
                         selectedHobbies = profile.hobbies
                         mainPhotoUri = profile.mainPhotoUrl.ifBlank { null }
                         galleryPhotoUris = profile.galleryPhotoUrls
+                        isCreatingProfile = false
                     }
                     // Si el usuario no existe aún, dejamos los campos vacíos (valores por defecto)
                     // Esto es normal para usuarios nuevos que aún no han completado su perfil
@@ -155,7 +157,7 @@ class ProfileEditViewModel @Inject constructor(
 
             try {
                 Log.d("ProfileEditVM", "=== Iniciando guardado de perfil ===")
-                
+
                 // Validaciones
                 val ageInt = age.toIntOrNull()
                 if (ageInt == null || ageInt < 18 || ageInt > 100) {
@@ -239,13 +241,3 @@ class ProfileEditViewModel @Inject constructor(
         }
     }
 }
-
-
-
-
-
-
-
-
-
-

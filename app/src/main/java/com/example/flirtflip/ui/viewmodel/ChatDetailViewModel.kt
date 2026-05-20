@@ -46,6 +46,27 @@ class ChatDetailViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Envía una propuesta de Date Roulette como mensaje especial.
+     * El texto incluye un prefijo especial "🎲DATE_ROULETTE:" para que la UI
+     * pueda renderizarlo de forma diferente al resto de mensajes.
+     */
+    fun sendDateRouletteMessage(emoji: String, title: String, description: String) {
+        val rouletteText = "🎲DATE_ROULETTE:$emoji|$title|$description"
+        val newMessage = Message(
+            id = UUID.randomUUID().toString(),
+            chatId = chatId,
+            senderId = currentUserId,
+            text = rouletteText,
+            timestamp = LocalDateTime.now(),
+            liked = false,
+            isRead = false
+        )
+        viewModelScope.launch {
+            chatRepository.sendMessage(chatId, newMessage)
+        }
+    }
+
     fun deleteMessage(messageId: String) {
         viewModelScope.launch {
             chatRepository.deleteMessage(chatId, messageId)

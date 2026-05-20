@@ -75,7 +75,25 @@ class FirebaseMatchRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getSwipesForUser(userId: String): Flow<List<Swipe>> {
-        TODO("Opcional: Solo si necesitas ver a quién diste Like antes")
+    override fun getSwipesForUser(userId: String): Flow<List<Swipe>> = callbackFlow {
+        val subscription = firestore.collection("swipes")
+            .whereEqualTo("toUserId", userId)
+            .whereEqualTo("type", SwipeType.FLIRT.name)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                val swipes = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        Swipe(
+                            id = doc.id,
+                            fromUserId = doc.getString("fromUserId") ?: "",
+                            toUserId = doc.getString("toUserId") ?: "",
+                            type = SwipeType.valueOf(doc.getString("type") ?: "PASS"),
+                            timestamp = doc.getLong("timestamp") ?: 0L
+                        )
+                    } catch (e: Exception) { null }
+                } ?: emptyList()
+                trySend(swipes)
+            }
+        awaitClose { subscription.remove() }
     }
 }
