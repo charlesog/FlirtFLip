@@ -249,14 +249,16 @@ fun LoginScreen(
                                 Text(
                                     text = "Recuérdame",
                                     fontSize = 13.sp,
-                                    color = onSurfaceVariant
+                                    color = onSurfaceVariant,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                             TextButton(onClick = { }) {
                                 Text(
                                     text = "¿Olvidaste tu contraseña?",
                                     color = primary,
-                                    fontSize = 13.sp
+                                    fontSize = 12.sp
                                 )
                             }
                         }

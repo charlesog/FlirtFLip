@@ -43,8 +43,13 @@ class ProfileViewModel @Inject constructor(
 
     fun signOut(onComplete: () -> Unit) {
         viewModelScope.launch {
-            authRepository.signOut()
-            onComplete()
+            _currentUser.value = null
+            try {
+                authRepository.signOut()
+            } catch (_: Exception) {
+            } finally {
+                onComplete()
+            }
         }
     }
 }

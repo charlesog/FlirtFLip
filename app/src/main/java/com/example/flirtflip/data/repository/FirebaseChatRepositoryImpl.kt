@@ -133,4 +133,26 @@ class FirebaseChatRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun ensureChatExists(chatId: String, userIds: List<String>): Result<Unit> {
+        return try {
+            val docRef = firestore.collection("chats").document(chatId)
+            val snapshot = docRef.get().await()
+
+            // Solo crear si no existe ya
+            if (!snapshot.exists()) {
+                val chatData = mapOf(
+                    "id" to chatId,
+                    "userIds" to userIds,
+                    "lastMessage" to "¡Es un match! Di hola 👋",
+                    "lastMessageTimestamp" to System.currentTimeMillis(),
+                    "isActive" to true
+                )
+                docRef.set(chatData).await()
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

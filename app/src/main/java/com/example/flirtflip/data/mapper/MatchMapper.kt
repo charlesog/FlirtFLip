@@ -17,6 +17,7 @@ fun Match.toEntity(): MatchEntity {
         id = this.id,
         idUser1 = this.idUser1,
         idUser2 = this.idUser2,
+        users = listOf(this.idUser1, this.idUser2),
         timestamp = this.timestamp
     )
 }

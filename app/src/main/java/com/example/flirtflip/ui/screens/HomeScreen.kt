@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -98,7 +99,6 @@ import com.example.flirtflip.ui.theme.matchColor
 import com.example.flirtflip.ui.theme.onBackground
 import com.example.flirtflip.ui.theme.onSurfaceVariant
 import com.example.flirtflip.ui.theme.primary
-import com.example.flirtflip.ui.theme.primaryContainer
 import com.example.flirtflip.ui.theme.secondaryContainer
 import com.example.flirtflip.ui.theme.softPinkSurface
 import com.example.flirtflip.ui.theme.superLikeBlue
@@ -160,7 +160,10 @@ fun HomeScreen(
                     onThemeChange = onThemeChange,
                     onNavigateToLegal = onNavigateToLegal,
                     onNavigateToLogin = onNavigateToLogin,
-                    onClose = { showPreferences = false }
+                    onClose = { showPreferences = false },
+                    swipeViewModel = swipeViewModel,
+                    profileViewModel = profileViewModel
+
                 )
             } else {
                 when (selectedTab) {
@@ -256,7 +259,6 @@ private fun MatchesTab(
     onNavigateToChatDetail: (String) -> Unit = {}
 ) {
     val matchedUsers by viewModel.matchedUsers.collectAsState()
-    val likesAges by viewModel.likesReceivedAges.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
     Column(
@@ -273,45 +275,6 @@ private fun MatchesTab(
                 CircularProgressIndicator(color = primary)
             }
         } else {
-            if (likesAges.isNotEmpty()) {
-                Text(
-                    "Les gustas a ${likesAges.size} ${if (likesAges.size == 1) "persona" else "personas"}",
-                    fontWeight = FontWeight.Bold, fontSize = 16.sp, color = onBackground
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("Haz match para ver quiénes son", fontSize = 13.sp, color = onSurfaceVariant)
-                Spacer(modifier = Modifier.height(Spacing.small))
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier.height(((likesAges.size / 3 + 1) * 120).dp),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.small),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.small)
-                ) {
-                    items(likesAges) { age ->
-                        Card(
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = primaryContainer),
-                            modifier = Modifier.height(110.dp)
-                        ) {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        Icons.Default.Person, null,
-                                        modifier = Modifier.size(36.dp),
-                                        tint = primary.copy(alpha = 0.4f)
-                                    )
-                                    Text(
-                                        "$age años", fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold, color = primary
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(Spacing.large))
-            }
-
             if (matchedUsers.isEmpty()) {
                 Box(
                     Modifier.fillMaxWidth().padding(top = 48.dp),
@@ -340,7 +303,18 @@ private fun MatchesTab(
                     verticalArrangement = Arrangement.spacedBy(Spacing.small)
                 ) {
                     items(matchedUsers) { user ->
-                        MatchUserCard(user = user, onClick = {})
+                        MatchUserCard(
+                            user = user,
+                            onClick = {
+                                val chatId = listOf(viewModel.currentUserId, user.id).sorted().joinToString("_")
+                                onNavigateToChatDetail(chatId)
+                            },
+                            onEnviarHola = {
+                                viewModel.sendHello(user.id) { chatId ->
+                                    onNavigateToChatDetail(chatId)
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -349,14 +323,15 @@ private fun MatchesTab(
 }
 
 @Composable
-private fun MatchUserCard(user: User, onClick: () -> Unit) {
+private fun MatchUserCard(user: User, onClick: () -> Unit, onEnviarHola: () -> Unit) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.height(200.dp),
+        modifier = Modifier.height(230.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE4F0)),
         onClick = onClick
     ) {
         Box(Modifier.fillMaxSize()) {
+            // Fondo con Degradado
             Box(
                 Modifier.fillMaxSize().background(
                     Brush.linearGradient(listOf(Color(0xFFFFE4F0), Color(0xFFFFD6EC)))
@@ -368,6 +343,8 @@ private fun MatchUserCard(user: User, onClick: () -> Unit) {
                     tint = primary.copy(alpha = 0.4f)
                 )
             }
+
+            // Imagen de perfil
             if (user.profile.mainPhotoUrl.isNotBlank()) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -377,20 +354,47 @@ private fun MatchUserCard(user: User, onClick: () -> Unit) {
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            Box(
+
+            // --- AQUÍ ESTÁ EL CAMBIO PRINCIPAL ---
+            // Agrupamos el degradado negro, el texto y el botón en una columna inferior
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.BottomStart)
+                    .align(Alignment.BottomCenter) // Todo el bloque se alinea abajo
                     .background(
-                        Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.6f)))
+                        Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.8f)))
                     )
-                    .padding(Spacing.small)
+                    .padding(horizontal = 8.dp, vertical = 8.dp) // Controla el padding general
             ) {
+                // 1. El Texto del usuario
                 Text(
-                    "${user.profile.name}, ${user.profile.age}",
-                    color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold
+                    text = "${user.profile.name}, ${user.profile.age}",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp) // Separación inferior antes del botón
                 )
+
+                // 2. El Botón (ahora se posiciona automáticamente debajo)
+                Button(
+                    onClick = onEnviarHola,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(containerColor = primary),
+                    contentPadding = PaddingValues(vertical = 8.dp) // Un padding interno cómodo
+                ) {
+                    Icon(
+                        Icons.Default.Chat,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = Color.White
+                    )
+                    // Volvemos a poner width aquí porque el Icono y el Texto van de lado a lado
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Enviar mensaje", fontSize = 12.sp, color = Color.White)
+                }
             }
+
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -409,7 +413,6 @@ private fun MatchUserCard(user: User, onClick: () -> Unit) {
     }
 }
 
-// ─── Preferencias con cerrar sesión ─────────────────────────────────────────
 
 @Composable
 private fun PreferencesPanel(
@@ -417,12 +420,13 @@ private fun PreferencesPanel(
     onThemeChange: (ThemePreference) -> Unit,
     onNavigateToLegal: () -> Unit,
     onNavigateToLogin: () -> Unit = {},
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    swipeViewModel: SwipeViewModel,
+    profileViewModel: ProfileViewModel
 ) {
-    var ageRange by remember { mutableStateOf(18f..50f) }
+    val savedAgeRange by swipeViewModel.ageRange.collectAsState()
+    var ageRange by remember(savedAgeRange) { mutableStateOf(savedAgeRange) }
     var showLogoutConfirm by remember { mutableStateOf(false) }
-    val profileViewModel: ProfileViewModel = hiltViewModel()
-
     if (showLogoutConfirm) {
         AlertDialog(
             onDismissRequest = { showLogoutConfirm = false },
@@ -482,6 +486,7 @@ private fun PreferencesPanel(
                 RangeSlider(
                     value = ageRange,
                     onValueChange = { ageRange = it },
+                    onValueChangeFinished = { swipeViewModel.applyAgeFilter(ageRange) },
                     valueRange = 18f..80f,
                     steps = 61,
                     colors = SliderDefaults.colors(

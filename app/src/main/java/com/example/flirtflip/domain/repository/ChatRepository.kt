@@ -9,4 +9,6 @@ interface ChatRepository {
     suspend fun sendMessage(chatId: String, message: Message): Result<Unit>
     fun getMyChats(userId: String): Flow<List<Chat>>
     suspend fun deleteMessage(chatId: String, messageId: String): Result<Unit>
+    suspend fun ensureChatExists(chatId: String, userIds: List<String>): Result<Unit>
+
 }

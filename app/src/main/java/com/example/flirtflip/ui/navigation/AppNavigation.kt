@@ -91,10 +91,10 @@ fun AppNavigation(
                 },
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
-                // Leemos la señal de "volver al perfil" desde el savedStateHandle
                 savedStateHandle = currentEntry.savedStateHandle,
                 themePreference = themePreference,
                 onThemeChange = onThemeChange

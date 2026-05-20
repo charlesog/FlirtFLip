@@ -46,7 +46,7 @@ class LoginViewModel @Inject constructor(
             result.fold(
                 onSuccess = {
                     // Guardar (o limpiar) preferencias según el checkbox
-                    userPreferences.saveLoginPrefs(email, rememberMe)
+                    userPreferences.saveRememberMe(rememberMe, email)
                     onSuccess()
                 },
                 onFailure = {
