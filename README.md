@@ -123,8 +123,13 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 
 ## 👨‍💻 Autor
 
-**Charles Og**
-- GitHub: [@charlesog](https://github.com/charlesog)
+**Charles Omar Guacollante Pulupa**
+**David Szabo**
+**Felix Zamarra Ocampo**
+
+- GitHub: [@Charles](https://github.com/charlesog)
+- GitHub: [@David](https://github.com/DestroyEx)
+- GitHub: [@Felix](https://github.com/felixzamarra)
 
 ---
 
