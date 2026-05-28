@@ -26,7 +26,8 @@ fun Chat.toEntity(): ChatEntity {
         id = this.id,
         userIds = this.userIds,
         lastMessage = this.lastMessage,
-        lastMessageTimestamp = this.lastMessageTimestamp?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli(),
+        lastMessageTimestamp = this.lastMessageTimestamp?.atZone(ZoneId.systemDefault())
+            ?.toInstant()?.toEpochMilli(),
         isActive = this.isActive
     )
 }

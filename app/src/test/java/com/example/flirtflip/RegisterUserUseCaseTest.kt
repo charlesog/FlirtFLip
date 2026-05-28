@@ -27,7 +27,9 @@ class RegisterUserDebugFlowTest {
         val passwordConPepperYHash = "HASH_SEGURO_CON_PIMIENTA_BCRYPT_999"
 
         // Configuramos el comportamiento de los "puertos" (Mocks)
-        coEvery { authRepository.signUp(emailRegistro, passwordOriginal) } returns Result.success(idGeneradoPorFirebase)
+        coEvery { authRepository.signUp(emailRegistro, passwordOriginal) } returns Result.success(
+            idGeneradoPorFirebase
+        )
         coEvery { securityProvider.hashPassword(passwordOriginal) } returns passwordConPepperYHash
 
         // Capturamos el objeto User final que se enviará a Firestore
@@ -38,10 +40,12 @@ class RegisterUserDebugFlowTest {
 
         // 3. EJECUCIÓN (Llamamos solo con lo que tenemos al registrar)
         // NOTA: Si tu UseCase aún pide el objeto User, pásale uno básico
-        val userBase = User(id = "", email = emailRegistro, password = "", profile = UserProfile(
-            name = "", firstSurname = "", secondSurname = "", age = 0,
-            gender = Gender.MALE, bio = "", hobbies = emptyList(), galerryUrls = emptyList()
-        ))
+        val userBase = User(
+            id = "", email = emailRegistro, password = "", profile = UserProfile(
+                name = "", firstSurname = "", secondSurname = "", age = 0,
+                gender = Gender.MALE, bio = "", hobbies = emptyList(), galerryUrls = emptyList()
+            )
+        )
 
         useCase(userBase.email, passwordOriginal)
 

@@ -9,29 +9,30 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
-class FusedLocationRepositoryImpl  @Inject constructor(
+class FusedLocationRepositoryImpl @Inject constructor(
     private val fusedLocationClient: FusedLocationProviderClient
 ) : LocationRepository {
 
     @SuppressWarnings("MissingPermission")
-    override suspend fun getCurrentLocation(): Location? = suspendCancellableCoroutine { continuation ->
-        val cancellationTokenSource = CancellationTokenSource()
+    override suspend fun getCurrentLocation(): Location? =
+        suspendCancellableCoroutine { continuation ->
+            val cancellationTokenSource = CancellationTokenSource()
 
-        fusedLocationClient.getCurrentLocation(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            cancellationTokenSource.token
-        ).addOnSuccessListener { location ->
-            if (location != null) {
-                continuation.resume(Location(location.latitude, location.longitude))
-            } else {
+            fusedLocationClient.getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                cancellationTokenSource.token
+            ).addOnSuccessListener { location ->
+                if (location != null) {
+                    continuation.resume(Location(location.latitude, location.longitude))
+                } else {
+                    continuation.resume(null)
+                }
+            }.addOnFailureListener {
                 continuation.resume(null)
             }
-        }.addOnFailureListener {
-            continuation.resume(null)
-        }
 
-        continuation.invokeOnCancellation {
-            cancellationTokenSource.cancel()
+            continuation.invokeOnCancellation {
+                cancellationTokenSource.cancel()
+            }
         }
-    }
 }

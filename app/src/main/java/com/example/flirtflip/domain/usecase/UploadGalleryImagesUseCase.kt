@@ -10,12 +10,15 @@ class UploadGalleryImagesUseCase @Inject constructor(
     private val imageRepository: ImageRepository,
     private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke(localImageUris: List<String>, context: Context): Result<List<String>> {
-        val userId = authRepository.currentUserId 
+    suspend operator fun invoke(
+        localImageUris: List<String>,
+        context: Context
+    ): Result<List<String>> {
+        val userId = authRepository.currentUserId
             ?: return Result.failure(Exception("User not authenticated"))
 
         val uploadedUrls = mutableListOf<String>()
-        
+
         for ((index, uri) in localImageUris.withIndex()) {
             try {
                 // Si ya es una URL de Firebase, mantenerla
@@ -24,17 +27,21 @@ class UploadGalleryImagesUseCase @Inject constructor(
                     uploadedUrls.add(uri)
                     continue
                 }
-                
+
                 // Si no, subirla
                 Log.d("UploadGalleryImages", "Uploading image $index: $uri")
                 val result = imageRepository.uploadUserImage(userId, uri, context)
                 result.fold(
-                    onSuccess = { url -> 
+                    onSuccess = { url ->
                         Log.d("UploadGalleryImages", "Image $index uploaded successfully: $url")
-                        uploadedUrls.add(url) 
+                        uploadedUrls.add(url)
                     },
                     onFailure = { error ->
-                        Log.e("UploadGalleryImages", "Failed to upload image $index: ${error.message}", error)
+                        Log.e(
+                            "UploadGalleryImages",
+                            "Failed to upload image $index: ${error.message}",
+                            error
+                        )
                         return Result.failure(Exception("Error al subir imagen ${index + 1}: ${error.message}"))
                     }
                 )
@@ -43,8 +50,11 @@ class UploadGalleryImagesUseCase @Inject constructor(
                 return Result.failure(Exception("Error inesperado al subir imagen ${index + 1}: ${e.message}"))
             }
         }
-        
-        Log.d("UploadGalleryImages", "All images uploaded successfully. Total: ${uploadedUrls.size}")
+
+        Log.d(
+            "UploadGalleryImages",
+            "All images uploaded successfully. Total: ${uploadedUrls.size}"
+        )
         return Result.success(uploadedUrls)
     }
 }

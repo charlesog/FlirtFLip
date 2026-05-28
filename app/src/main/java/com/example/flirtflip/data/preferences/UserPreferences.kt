@@ -21,10 +21,10 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class UserPreferences @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private val REMEMBER_ME_KEY  = booleanPreferencesKey("remember_me")
-    private val SAVED_EMAIL_KEY  = stringPreferencesKey("saved_email")
-    private val AGE_MIN_KEY      = floatPreferencesKey("age_min")
-    private val AGE_MAX_KEY      = floatPreferencesKey("age_max")
+    private val REMEMBER_ME_KEY = booleanPreferencesKey("remember_me")
+    private val SAVED_EMAIL_KEY = stringPreferencesKey("saved_email")
+    private val AGE_MIN_KEY = floatPreferencesKey("age_min")
+    private val AGE_MAX_KEY = floatPreferencesKey("age_max")
 
     private fun welcomeSeenKey(userId: String) =
         booleanPreferencesKey("welcome_seen_$userId")

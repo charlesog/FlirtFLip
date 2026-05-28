@@ -18,16 +18,16 @@ class LoginViewModel @Inject constructor(
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
-    var email        by mutableStateOf("")
-    var password     by mutableStateOf("")
-    var rememberMe   by mutableStateOf(false)
-    var isLoading    by mutableStateOf(false)
+    var email by mutableStateOf("")
+    var password by mutableStateOf("")
+    var rememberMe by mutableStateOf(false)
+    var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
     init {
         viewModelScope.launch {
             val savedRemember = userPreferences.rememberMe.first()
-            val savedEmail    = userPreferences.savedEmail.first()
+            val savedEmail = userPreferences.savedEmail.first()
             rememberMe = savedRemember
             if (savedRemember && savedEmail.isNotEmpty()) {
                 email = savedEmail
@@ -40,7 +40,7 @@ class LoginViewModel @Inject constructor(
      */
     fun onLoginClick(onSuccess: (showWelcome: Boolean) -> Unit) {
         viewModelScope.launch {
-            isLoading    = true
+            isLoading = true
             errorMessage = null
 
             val result = authRepository.login(email, password)

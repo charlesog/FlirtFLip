@@ -282,7 +282,13 @@ fun LoginScreen(
 
                         // Boton login
                         Button(
-                            onClick = { viewModel.onLoginClick(onSuccess = { showWelcome -> onNavigateToHome(showWelcome) }) },
+                            onClick = {
+                                viewModel.onLoginClick(onSuccess = { showWelcome ->
+                                    onNavigateToHome(
+                                        showWelcome
+                                    )
+                                })
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(Dimensions.buttonHeight),

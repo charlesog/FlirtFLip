@@ -5,7 +5,23 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -14,24 +30,31 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.flirtflip.ui.theme.primary
 import com.example.flirtflip.ui.theme.onBackground
 import com.example.flirtflip.ui.theme.onSurfaceVariant
+import com.example.flirtflip.ui.theme.primary
 import com.example.flirtflip.ui.viewmodel.WelcomeBotViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,7 +69,12 @@ private val welcomeFlow: List<BotMessage> = listOf(
     BotMessage("¡Hola! 👋 Soy FlirtBot, tu guía en FlirtFlip. ¿Listo para encontrar a alguien especial? 💕"),
     BotMessage(
         "Te voy a enseñar cómo funciona la app en segundos. ¿Por dónde empezamos?",
-        options = listOf("🔥 Explorar perfiles", "💬 Chats y matches", "👤 Mi perfil", "⚙️ Preferencias")
+        options = listOf(
+            "🔥 Explorar perfiles",
+            "💬 Chats y matches",
+            "👤 Mi perfil",
+            "⚙️ Preferencias"
+        )
     ),
 )
 
@@ -54,38 +82,82 @@ private fun getBotReply(option: String): List<BotMessage> = when {
     option.contains("Explorar") -> listOf(
         BotMessage("¡La pestaña Explorar es el corazón de FlirtFlip! 🧭"),
         BotMessage("Verás tarjetas con perfiles de personas cerca de ti. Puedes:\n\n❌ Pulsar la X para pasar\n💚 Pulsar el corazón para dar like\n⭐ La estrella es un Super Like\n⚡ El rayo es un Boost para aumentar visibilidad"),
-        BotMessage("Si a alguien le gustas también, ¡es un Match! 🎉 Te avisará al instante.",
-            options = listOf("💬 Ver Chats", "👤 Ver Perfil", "⚙️ Ver Preferencias", "✅ ¡Entendido!"))
+        BotMessage(
+            "Si a alguien le gustas también, ¡es un Match! 🎉 Te avisará al instante.",
+            options = listOf("💬 Ver Chats", "👤 Ver Perfil", "⚙️ Ver Preferencias", "✅ ¡Entendido!")
+        )
     )
+
     option.contains("Chat") || option.contains("match", ignoreCase = true) -> listOf(
         BotMessage("¡Los Matches son conexiones mutuas! ❤️"),
         BotMessage("Cuando hay match, aparece en la pestaña Matches. Desde ahí puedes:\n\n• Ver su foto y nombre\n• Pulsar 'Enviar mensaje' para iniciar la conversación\n• Tocar la tarjeta para abrir el chat directamente"),
-        BotMessage("En la pestaña Chats verás todos tus mensajes activos ordenados por el más reciente. 💬",
-            options = listOf("🔥 Ver Explorar", "👤 Ver Perfil", "⚙️ Ver Preferencias", "✅ ¡Entendido!"))
+        BotMessage(
+            "En la pestaña Chats verás todos tus mensajes activos ordenados por el más reciente. 💬",
+            options = listOf(
+                "🔥 Ver Explorar",
+                "👤 Ver Perfil",
+                "⚙️ Ver Preferencias",
+                "✅ ¡Entendido!"
+            )
+        )
     )
+
     option.contains("perfil", ignoreCase = true) || option.contains("Perfil") -> listOf(
         BotMessage("Tu perfil es tu carta de presentación 📸"),
         BotMessage("En la pestaña Perfil puedes:\n\n• Ver cómo te ven los demás\n• Pulsar 'Editar perfil' para cambiar tu foto, bio, trabajo e intereses\n• Añadir fotos a tu galería\n• Elegir tus hobbies para matches más afines"),
-        BotMessage("💡 Un perfil completo con buena foto multiplica tus posibilidades de match.",
-            options = listOf("🔥 Ver Explorar", "💬 Ver Chats", "⚙️ Ver Preferencias", "✅ ¡Entendido!"))
+        BotMessage(
+            "💡 Un perfil completo con buena foto multiplica tus posibilidades de match.",
+            options = listOf(
+                "🔥 Ver Explorar",
+                "💬 Ver Chats",
+                "⚙️ Ver Preferencias",
+                "✅ ¡Entendido!"
+            )
+        )
     )
+
     option.contains("Prefer") || option.contains("⚙️") -> listOf(
         BotMessage("Las Preferencias te dan control total ⚙️"),
         BotMessage("Accede pulsando el icono ≡ en la barra superior de Explorar. Desde ahí:\n\n• 🎂 Filtra por rango de edad\n• 🌙 Cambia entre tema claro, oscuro o automático\n• 📋 Lee la información legal\n• 🚪 Cierra sesión de forma segura"),
-        BotMessage("Las notificaciones 🔔 te avisarán cuando tengas nuevos matches o mensajes.",
-            options = listOf("🔥 Ver Explorar", "💬 Ver Chats", "👤 Ver Perfil", "🎉 ¡Empezar a explorar!"))
+        BotMessage(
+            "Las notificaciones 🔔 te avisarán cuando tengas nuevos matches o mensajes.",
+            options = listOf(
+                "🔥 Ver Explorar",
+                "💬 Ver Chats",
+                "👤 Ver Perfil",
+                "🎉 ¡Empezar a explorar!"
+            )
+        )
     )
+
     option.contains("Entendido") || option.contains("gracias", ignoreCase = true) -> listOf(
         BotMessage("¡Perfecto! Ya sabes todo lo que necesitas 🚀"),
-        BotMessage("Recuerda: completa tu perfil, sé tú mismo/a y ¡que empiece el match! 💕",
-            options = listOf("🔥 Ver Explorar", "💬 Ver Chats", "👤 Ver Perfil", "⚙️ Ver Preferencias", "🎉 ¡Empezar a explorar!"))
+        BotMessage(
+            "Recuerda: completa tu perfil, sé tú mismo/a y ¡que empiece el match! 💕",
+            options = listOf(
+                "🔥 Ver Explorar",
+                "💬 Ver Chats",
+                "👤 Ver Perfil",
+                "⚙️ Ver Preferencias",
+                "🎉 ¡Empezar a explorar!"
+            )
+        )
     )
+
     option.contains("Empezar") || option.contains("explorar") -> listOf(
         BotMessage("¡Vamos allá! Te espero en la app 💫 Suerte encontrando a alguien especial 🌹")
     )
+
     else -> listOf(
-        BotMessage("¡Claro! ¿En qué más puedo ayudarte?",
-            options = listOf("🔥 Explorar perfiles", "💬 Chats y matches", "👤 Mi perfil", "⚙️ Preferencias"))
+        BotMessage(
+            "¡Claro! ¿En qué más puedo ayudarte?",
+            options = listOf(
+                "🔥 Explorar perfiles",
+                "💬 Chats y matches",
+                "👤 Mi perfil",
+                "⚙️ Preferencias"
+            )
+        )
     )
 }
 
@@ -94,11 +166,11 @@ fun WelcomeBotScreen(
     onFinish: () -> Unit,
     viewModel: WelcomeBotViewModel = hiltViewModel()
 ) {
-    val messages   = remember { mutableStateListOf<BotMessage>() }
-    val listState  = rememberLazyListState()
-    var isTyping   by remember { mutableStateOf(false) }
-    var canFinish  by remember { mutableStateOf(false) }
-    val scope      = rememberCoroutineScope()
+    val messages = remember { mutableStateListOf<BotMessage>() }
+    val listState = rememberLazyListState()
+    var isTyping by remember { mutableStateOf(false) }
+    var canFinish by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     // Función para marcar visto y salir
     val finishAndMark: () -> Unit = {
@@ -126,7 +198,7 @@ fun WelcomeBotScreen(
         }
     }
 
-    val statusBarPadding    = WindowInsets.statusBars.asPaddingValues()
+    val statusBarPadding = WindowInsets.statusBars.asPaddingValues()
     val navigationBarPadding = WindowInsets.navigationBars.asPaddingValues()
 
     Box(
@@ -154,11 +226,21 @@ fun WelcomeBotScreen(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(22.dp))
+                        Icon(
+                            Icons.Default.AutoAwesome,
+                            null,
+                            tint = Color.White,
+                            modifier = Modifier.size(22.dp)
+                        )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
-                        Text("FlirtBot", fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, color = primary)
+                        Text(
+                            "FlirtBot",
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 17.sp,
+                            color = primary
+                        )
                         Text("Guía de FlirtFlip", fontSize = 12.sp, color = onSurfaceVariant)
                     }
                 }
@@ -190,9 +272,11 @@ fun WelcomeBotScreen(
                                                 canFinish = true
                                             }
                                             // Quitar opciones del mensaje actual
-                                            val lastIdx = messages.indexOfLast { it.options.isNotEmpty() }
+                                            val lastIdx =
+                                                messages.indexOfLast { it.options.isNotEmpty() }
                                             if (lastIdx >= 0) {
-                                                messages[lastIdx] = messages[lastIdx].copy(options = emptyList())
+                                                messages[lastIdx] =
+                                                    messages[lastIdx].copy(options = emptyList())
                                             }
                                             // Respuesta del usuario
                                             messages.add(BotMessage(selected, isBot = false))
@@ -251,7 +335,12 @@ fun WelcomeBotScreen(
                     )
                     if (canFinish) {
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(Icons.Default.ArrowForward, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.ArrowForward,
+                            null,
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
             }
@@ -273,11 +362,21 @@ private fun BotBubble(text: String) {
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(18.dp))
+            Icon(
+                Icons.Default.AutoAwesome,
+                null,
+                tint = Color.White,
+                modifier = Modifier.size(18.dp)
+            )
         }
         Spacer(modifier = Modifier.width(10.dp))
         Surface(
-            shape = RoundedCornerShape(topStart = 4.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 18.dp),
+            shape = RoundedCornerShape(
+                topStart = 4.dp,
+                topEnd = 18.dp,
+                bottomStart = 18.dp,
+                bottomEnd = 18.dp
+            ),
             color = Color.White,
             shadowElevation = 2.dp,
             modifier = Modifier.widthIn(max = 270.dp)
@@ -297,7 +396,12 @@ private fun BotBubble(text: String) {
 private fun UserBubble(text: String) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         Surface(
-            shape = RoundedCornerShape(topStart = 18.dp, topEnd = 4.dp, bottomStart = 18.dp, bottomEnd = 18.dp),
+            shape = RoundedCornerShape(
+                topStart = 18.dp,
+                topEnd = 4.dp,
+                bottomStart = 18.dp,
+                bottomEnd = 18.dp
+            ),
             color = primary,
             modifier = Modifier.widthIn(max = 240.dp)
         ) {
@@ -343,11 +447,21 @@ private fun TypingIndicator() {
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(16.dp))
+            Icon(
+                Icons.Default.AutoAwesome,
+                null,
+                tint = Color.White,
+                modifier = Modifier.size(16.dp)
+            )
         }
         Spacer(modifier = Modifier.width(8.dp))
         Surface(
-            shape = RoundedCornerShape(topStart = 4.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 18.dp),
+            shape = RoundedCornerShape(
+                topStart = 4.dp,
+                topEnd = 18.dp,
+                bottomStart = 18.dp,
+                bottomEnd = 18.dp
+            ),
             color = Color.White,
             shadowElevation = 2.dp
         ) {

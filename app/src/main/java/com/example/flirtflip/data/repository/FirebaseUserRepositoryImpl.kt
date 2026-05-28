@@ -16,8 +16,8 @@ import javax.inject.Singleton
 
 @Singleton
 class FirebaseUserRepositoryImpl @Inject constructor(
-    private val firestore : FirebaseFirestore
-) : UserRepository{
+    private val firestore: FirebaseFirestore
+) : UserRepository {
 
     private val userCollection = firestore.collection("users")
 
@@ -53,7 +53,7 @@ class FirebaseUserRepositoryImpl @Inject constructor(
 
             val domainUsers = entities.map { it.toDomain() }
             return Result.success(domainUsers)
-        }catch (e: Exception){
+        } catch (e: Exception) {
             return Result.failure(AppError.UnknownError(e))
         }
     }
@@ -68,9 +68,10 @@ class FirebaseUserRepositoryImpl @Inject constructor(
 
             Result.success(Unit)
         } catch (e: Exception) {
-            val error = when{
+            val error = when {
                 e is FirebaseFirestoreException && e.code ==
                         FirebaseFirestoreException.Code.NOT_FOUND -> AppError.UserNotFound()
+
                 else -> AppError.NetworkError()
             }
             Result.failure(error)

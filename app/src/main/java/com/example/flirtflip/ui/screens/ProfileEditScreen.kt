@@ -244,7 +244,9 @@ fun ProfileEditScreen(
                     text = "${viewModel.bio.length}/500",
                     fontSize = 12.sp,
                     color = onSurfaceVariant,
-                    modifier = Modifier.align(Alignment.End).padding(top = 4.dp)
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(top = 4.dp)
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.large))
@@ -689,7 +691,9 @@ private fun ErrorMessage(message: String, onDismiss: () -> Unit) {
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -716,7 +720,9 @@ private fun SuccessMessage(message: String, onDismiss: () -> Unit) {
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.medium),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

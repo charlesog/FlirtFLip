@@ -14,14 +14,20 @@ import javax.inject.Singleton
 object FirebaseModule {
     @Provides
     @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth { return FirebaseAuth.getInstance() }
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
+    }
 
     @Provides
     @Singleton
-    fun provideFirestore(): FirebaseFirestore { return FirebaseFirestore.getInstance() }
+    fun provideFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
+    }
 
     @Provides
     @Singleton
-    fun provideStorage(): FirebaseStorage { return FirebaseStorage.getInstance() }
+    fun provideStorage(): FirebaseStorage {
+        return FirebaseStorage.getInstance()
+    }
 
 }

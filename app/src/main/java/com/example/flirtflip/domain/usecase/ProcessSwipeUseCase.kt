@@ -11,7 +11,11 @@ import javax.inject.Inject
 class ProcessSwipeUseCase @Inject constructor(
     private val matchRepository: MatchRepository
 ) {
-    suspend operator fun invoke(fromUserId: String, toUserId: String, isLike: Boolean): Result<Boolean> {
+    suspend operator fun invoke(
+        fromUserId: String,
+        toUserId: String,
+        isLike: Boolean
+    ): Result<Boolean> {
         val swipe = Swipe(
             id = UUID.randomUUID().toString(),
             fromUserId = fromUserId,

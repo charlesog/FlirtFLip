@@ -49,10 +49,18 @@ fun UserProfileEntity.toDomain(): UserProfile {
         firstSurname = this.firstSurname,
         secondSurname = this.secondSurname,
         age = this.age,
-        gender = try { Gender.valueOf(this.gender) } catch (e: Exception) { Gender.UNDEFINED },
+        gender = try {
+            Gender.valueOf(this.gender)
+        } catch (e: Exception) {
+            Gender.UNDEFINED
+        },
         bio = this.bio,
         hobbies = this.hobbies.mapNotNull {
-            try { Hobby.valueOf(it) } catch (e: Exception) { null }
+            try {
+                Hobby.valueOf(it)
+            } catch (e: Exception) {
+                null
+            }
         },
         mainPhotoUrl = this.mainPhotoUrl,
         galleryPhotoUrls = this.galleryPhotoUrls,

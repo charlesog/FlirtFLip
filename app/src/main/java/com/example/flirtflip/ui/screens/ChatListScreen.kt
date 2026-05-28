@@ -87,7 +87,9 @@ fun ChatListScreen(
         },
         containerColor = Color(0xFFFFF5F8)
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()) {
             if (chats.isEmpty()) {
                 EmptyChatsView()
             } else {

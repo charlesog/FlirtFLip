@@ -1,6 +1,6 @@
 package com.example.flirtflip.data.entity
 
-data class SwipeEntity (
+data class SwipeEntity(
     val id: String = "",
     val fromUserId: String = "",
     val toUserId: String = "",

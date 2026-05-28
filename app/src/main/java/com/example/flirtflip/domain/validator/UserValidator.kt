@@ -15,7 +15,8 @@ object UserValidator {
      * {8,}             : Longitud mínima de 8 caracteres (sin límite máximo).
      * $                : Fin de la cadena.
      */
-    private val passwordRegex = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
+    private val passwordRegex =
+        Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
 
     fun validateOnlyAuth(email: String, passwordRaw: String): ValidationResult {
         return when {

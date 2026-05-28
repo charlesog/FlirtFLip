@@ -16,12 +16,27 @@ object DateRoulette {
         DatePlan("🍣", "Noche de sushi", "Para los que se atreven con los palillos", "food"),
         DatePlan("🍦", "Heladería", "Un plan dulce y sin presión, perfecto para empezar", "food"),
         DatePlan("🥂", "Cena romántica", "Velas, buena música y mejor compañía", "food"),
-        DatePlan("🍺", "Tapas y cañas", "El plan español por excelencia, relajado y divertido", "food"),
+        DatePlan(
+            "🍺",
+            "Tapas y cañas",
+            "El plan español por excelencia, relajado y divertido",
+            "food"
+        ),
 
         // Cultura
         DatePlan("🎬", "Noche de cine", "Elegid una peli juntos y debatidla después", "culture"),
-        DatePlan("🏛️", "Visita a un museo", "Para los que prefieren algo con más sustancia", "culture"),
-        DatePlan("🎭", "Obra de teatro", "Un plan diferente que siempre da de qué hablar", "culture"),
+        DatePlan(
+            "🏛️",
+            "Visita a un museo",
+            "Para los que prefieren algo con más sustancia",
+            "culture"
+        ),
+        DatePlan(
+            "🎭",
+            "Obra de teatro",
+            "Un plan diferente que siempre da de qué hablar",
+            "culture"
+        ),
         DatePlan("📚", "Librería + café", "Cada uno elige un libro para el otro", "culture"),
 
         // Aventura
@@ -29,7 +44,12 @@ object DateRoulette {
         DatePlan("🚴", "Ruta en bici", "Explorad la ciudad o el campo juntos", "sport"),
         DatePlan("🎳", "Tarde de bowling", "Competitivo, divertido y siempre hay risas", "sport"),
         DatePlan("🏓", "Ping pong", "Rápido, dinámico y muy revelador del carácter", "sport"),
-        DatePlan("🧘", "Clase de yoga", "Para los que buscan conexión más allá de lo físico", "sport"),
+        DatePlan(
+            "🧘",
+            "Clase de yoga",
+            "Para los que buscan conexión más allá de lo físico",
+            "sport"
+        ),
         DatePlan("🏊", "Piscina o playa", "Si el tiempo acompaña, imposible aburrirse", "sport"),
 
         // Creatividad
@@ -38,14 +58,29 @@ object DateRoulette {
         DatePlan("📸", "Sesión de fotos", "Explorad la ciudad buscando el mejor encuadre", "art"),
 
         // Naturaleza
-        DatePlan("🌳", "Picnic en el parque", "Sencillo, íntimo y con posibilidad de siesta", "nature"),
+        DatePlan(
+            "🌳",
+            "Picnic en el parque",
+            "Sencillo, íntimo y con posibilidad de siesta",
+            "nature"
+        ),
         DatePlan("🌅", "Ver el atardecer", "El plan más romántico con el menor esfuerzo", "nature"),
         DatePlan("🐾", "Visita al zoo", "Divertido, relajado y siempre hay conversación", "nature"),
 
         // Indoor
-        DatePlan("🎮", "Tarde de videojuegos", "Para los que saben que el ocio digital une", "gaming"),
+        DatePlan(
+            "🎮",
+            "Tarde de videojuegos",
+            "Para los que saben que el ocio digital une",
+            "gaming"
+        ),
         DatePlan("🧩", "Escape room", "La prueba definitiva del trabajo en equipo", "gaming"),
-        DatePlan("🎲", "Noche de juegos de mesa", "Competitividad sana y muchas risas garantizadas", "gaming"),
+        DatePlan(
+            "🎲",
+            "Noche de juegos de mesa",
+            "Competitividad sana y muchas risas garantizadas",
+            "gaming"
+        ),
     )
 
     // Sugerimos planes según hobbies en común, o random si no hay coincidencias

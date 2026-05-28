@@ -1,15 +1,16 @@
 package com.example.flirtflip.data.security
 
+import com.example.flirtflip.BuildConfig
 import com.example.flirtflip.domain.repository.SecurityProvider
 import org.mindrot.jbcrypt.BCrypt
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BCryptSecurityProvider @Inject constructor() : SecurityProvider{
+class BCryptSecurityProvider @Inject constructor() : SecurityProvider {
 
     private companion object {
-        const val PEPPER = "FUW5PE_FlitrtFlip_T4P9D/RWG9R$%12"
+        const val PEPPER = BuildConfig.BCRYPT_PEPPER
         const val BYCRYPT_LONG_ROUNDS = 12
     }
 

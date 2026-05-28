@@ -129,7 +129,9 @@ fun DateRouletteDialog(
                             Icon(
                                 Icons.Default.Casino,
                                 contentDescription = null,
-                                modifier = Modifier.size(64.dp).rotate(rotation.value),
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .rotate(rotation.value),
                                 tint = primary.copy(alpha = 0.4f)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -145,7 +147,9 @@ fun DateRouletteDialog(
                             Icon(
                                 Icons.Default.Casino,
                                 contentDescription = null,
-                                modifier = Modifier.size(64.dp).rotate(rotation.value),
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .rotate(rotation.value),
                                 tint = primary
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -186,7 +190,9 @@ fun DateRouletteDialog(
                     Button(
                         onClick = { isSpinning = true },
                         enabled = !isSpinning,
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = primary)
                     ) {
@@ -198,7 +204,9 @@ fun DateRouletteDialog(
                     // Proponer plan
                     Button(
                         onClick = { currentPlan?.let { onSendPlan(it) } },
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = primary)
                     ) {
@@ -215,7 +223,9 @@ fun DateRouletteDialog(
                             hasSpun = false
                             isSpinning = true
                         },
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonColors(
                             containerColor = Color.Transparent,

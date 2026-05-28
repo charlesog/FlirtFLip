@@ -17,15 +17,15 @@ import com.example.flirtflip.ui.screens.WelcomeBotScreen
 import com.example.flirtflip.ui.theme.ThemePreference
 
 sealed class Screen(val route: String) {
-    object Login          : Screen("login")
-    object SignUp         : Screen("signup")
-    object WelcomeBot     : Screen("welcome_bot")
-    object CompleteProfile: Screen("complete_profile")
-    object Home           : Screen("home")
-    object ProfileEdit    : Screen("profile_edit")
-    object ChatList       : Screen("chat_list")
-    object ChatDetail     : Screen("chat_detail/{chatId}")
-    object Legal          : Screen("legal")
+    object Login : Screen("login")
+    object SignUp : Screen("signup")
+    object WelcomeBot : Screen("welcome_bot")
+    object CompleteProfile : Screen("complete_profile")
+    object Home : Screen("home")
+    object ProfileEdit : Screen("profile_edit")
+    object ChatList : Screen("chat_list")
+    object ChatDetail : Screen("chat_detail/{chatId}")
+    object Legal : Screen("legal")
 }
 
 @Composable
@@ -46,7 +46,8 @@ fun AppNavigation(
                 onNavigateToHome = { showWelcome ->
                     // showWelcome = true  → primera vez, mostrar bot
                     // showWelcome = false → ya lo vio antes, ir directo a Home
-                    val destination = if (showWelcome) Screen.WelcomeBot.route else Screen.Home.route
+                    val destination =
+                        if (showWelcome) Screen.WelcomeBot.route else Screen.Home.route
                     navController.navigate(destination) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }

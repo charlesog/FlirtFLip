@@ -161,7 +161,14 @@ fun ChatDetailScreen(
                             modifier = Modifier
                                 .size(38.dp)
                                 .clip(CircleShape)
-                                .background(Brush.linearGradient(colors = listOf(Color(0xFFFF4081), Color(0xFFFF80AB)))),
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            Color(0xFFFF4081),
+                                            Color(0xFFFF80AB)
+                                        )
+                                    )
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             if (!matchImageUrl.isNullOrBlank()) {
@@ -234,7 +241,12 @@ fun ChatDetailScreen(
                         modifier = Modifier
                             .size(44.dp)
                             .background(
-                                Brush.linearGradient(colors = listOf(Color(0xFFFF6B9D), Color(0xFFFF4081))),
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFFFF6B9D),
+                                        Color(0xFFFF4081)
+                                    )
+                                ),
                                 shape = CircleShape
                             )
                     ) {
@@ -264,7 +276,12 @@ fun ChatDetailScreen(
                         modifier = Modifier
                             .size(48.dp)
                             .background(
-                                Brush.linearGradient(colors = listOf(Color(0xFFFF4081), Color(0xFFFF80AB))),
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFFFF4081),
+                                        Color(0xFFFF80AB)
+                                    )
+                                ),
                                 shape = CircleShape
                             )
                     ) {
@@ -438,7 +455,12 @@ fun ChatBubble(message: Message, isMine: Boolean, onLongClick: () -> Unit) {
     val alignment = if (isMine) Alignment.End else Alignment.Start
     val color = if (isMine) Color(0xFFFF4081) else Color(0xFFEFEFEF)
     val contentColor = if (isMine) Color.White else Color(0xFF2C2C2C)
-    val shape = if (isMine) RoundedCornerShape(16.dp, 16.dp, 2.dp, 16.dp) else RoundedCornerShape(16.dp, 16.dp, 16.dp, 2.dp)
+    val shape = if (isMine) RoundedCornerShape(16.dp, 16.dp, 2.dp, 16.dp) else RoundedCornerShape(
+        16.dp,
+        16.dp,
+        16.dp,
+        2.dp
+    )
 
     val timeText = remember(message.timestamp) {
         message.timestamp.format(DateTimeFormatter.ofPattern("HH:mm"))

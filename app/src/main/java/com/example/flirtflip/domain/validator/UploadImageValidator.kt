@@ -8,7 +8,7 @@ object UploadImageValidator {
         return if (extension.isEmpty()) true else ALLOWED_FILE_TYPES.contains(extension)
     }
 
-    fun validateImage(uriStr: String): ValidationResult{
+    fun validateImage(uriStr: String): ValidationResult {
         return when {
             uriStr.isBlank() -> ValidationResult.Invalid("Image cannot be empty")
 

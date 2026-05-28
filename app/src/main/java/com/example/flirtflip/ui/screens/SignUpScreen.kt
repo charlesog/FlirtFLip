@@ -246,7 +246,9 @@ fun SignUpScreen(
                                 Icon(Icons.Default.Lock, contentDescription = null, tint = primary)
                             },
                             trailingIcon = {
-                                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                                IconButton(onClick = {
+                                    confirmPasswordVisible = !confirmPasswordVisible
+                                }) {
                                     Icon(
                                         imageVector = if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                         contentDescription = null,

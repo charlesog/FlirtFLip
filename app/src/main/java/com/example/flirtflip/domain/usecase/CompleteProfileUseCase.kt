@@ -16,9 +16,13 @@ class CompleteProfileUseCase @Inject constructor(
     private val authRepository: AuthRepository,
     private val imageRepository: ImageRepository
 ) {
-    suspend operator fun invoke(profile: UserProfile, localPhotoUri: String? = null, context: Context) : Result<Unit> {
-        val currentId = authRepository.currentUserId ?:
-            return Result.failure(Exception("User not authenticated"))
+    suspend operator fun invoke(
+        profile: UserProfile,
+        localPhotoUri: String? = null,
+        context: Context
+    ): Result<Unit> {
+        val currentId = authRepository.currentUserId
+            ?: return Result.failure(Exception("User not authenticated"))
 
         var finalProfile = profile
 
@@ -39,7 +43,7 @@ class CompleteProfileUseCase @Inject constructor(
 
         // Intentar actualizar el perfil
         val updateResult = userRepository.updateProfile(currentId, finalProfile)
-        
+
         // Si falla porque el usuario no existe, crearlo
         return if (updateResult.isFailure && updateResult.exceptionOrNull() is AppError.UserNotFound) {
             // El usuario no existe, crearlo completo

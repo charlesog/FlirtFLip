@@ -80,7 +80,9 @@ class FirebaseMatchRepositoryImpl @Inject constructor(
             .whereEqualTo("toUserId", userId)
             .whereEqualTo("type", SwipeType.FLIRT.name)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    close(error); return@addSnapshotListener
+                }
                 val swipes = snapshot?.documents?.mapNotNull { doc ->
                     try {
                         Swipe(
@@ -90,7 +92,9 @@ class FirebaseMatchRepositoryImpl @Inject constructor(
                             type = SwipeType.valueOf(doc.getString("type") ?: "PASS"),
                             timestamp = doc.getLong("timestamp") ?: 0L
                         )
-                    } catch (e: Exception) { null }
+                    } catch (e: Exception) {
+                        null
+                    }
                 } ?: emptyList()
                 trySend(swipes)
             }

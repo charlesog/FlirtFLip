@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -22,6 +24,24 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        val localProps = gradleLocalProperties(rootDir, providers)
+        buildConfigField(
+            "String",
+            "BCRYPT_PEPPER",
+            "\"${localProps.getProperty("BCRYPT_PEPPER")}\""
+        )
+        buildConfigField(
+            "String",
+            "CLOUDINARY_CLOUD_NAME",
+            "\"${localProps.getProperty("CLOUDINARY_CLOUD_NAME")}\""
+        )
+        buildConfigField(
+            "String",
+            "CLOUDINARY_UPLOAD_PRESET",
+            "\"${localProps.getProperty("CLOUDINARY_UPLOAD_PRESET")}\""
+        )
+
     }
 
     buildTypes {
@@ -45,6 +65,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {

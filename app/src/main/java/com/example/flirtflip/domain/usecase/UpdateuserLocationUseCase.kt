@@ -11,7 +11,7 @@ class UpdateuserLocationUseCase @Inject constructor(
         val locationResult = getDeviceLocationUseCase()
 
         return locationResult.fold(
-            onSuccess = {location ->
+            onSuccess = { location ->
                 userRepository.updateLocation(userId, location)
             },
             onFailure = { error ->

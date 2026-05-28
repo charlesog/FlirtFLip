@@ -36,7 +36,8 @@ import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
@@ -84,6 +85,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import coil.compose.AsyncImage
@@ -106,10 +109,6 @@ import com.example.flirtflip.ui.viewmodel.MatchesViewModel
 import com.example.flirtflip.ui.viewmodel.ProfileViewModel
 import com.example.flirtflip.ui.viewmodel.SwipeUiState
 import com.example.flirtflip.ui.viewmodel.SwipeViewModel
-import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.NotificationsNone
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun HomeScreen(
@@ -175,6 +174,7 @@ fun HomeScreen(
                         uiState, swipeViewModel, onNavigateToChatDetail,
                         onOpenPreferences = { showPreferences = true }
                     )
+
                     1 -> MatchesTab(matchesViewModel, onNavigateToChatDetail)
                     3 -> ProfileTab(
                         onNavigateToProfile = onNavigateToProfile,
@@ -209,7 +209,10 @@ private fun ExploreTab(
             hasNewNotifications = hasNewNotifications
         )
         Box(
-            modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = Spacing.medium),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(horizontal = Spacing.medium),
             contentAlignment = Alignment.Center
         ) {
             when (val state = uiState) {
@@ -220,10 +223,18 @@ private fun ExploreTab(
                         if (state.currentIndex + 1 < state.profiles.size) {
                             ProfileCard(
                                 user = state.profiles[state.currentIndex + 1],
-                                modifier = Modifier.fillMaxWidth().height(520.dp).padding(Spacing.medium)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(520.dp)
+                                    .padding(Spacing.medium)
                             )
                         }
-                        ProfileCard(user = currentUser, modifier = Modifier.fillMaxWidth().height(520.dp))
+                        ProfileCard(
+                            user = currentUser,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(520.dp)
+                        )
                     } else if (!state.showMatchDialog) {
                         NoMoreProfilesCard()
                     }
@@ -236,7 +247,8 @@ private fun ExploreTab(
                                 val myId = viewModel.currentUserId
                                 val otherId = state.matchedUser.id
                                 if (myId != null) {
-                                    val chatId = listOfNotNull(myId, otherId).sorted().joinToString("_")
+                                    val chatId =
+                                        listOfNotNull(myId, otherId).sorted().joinToString("_")
                                     viewModel.dismissMatchDialog()
                                     onNavigateToChatDetail(chatId)
                                 }
@@ -249,6 +261,7 @@ private fun ExploreTab(
                         )
                     }
                 }
+
                 is SwipeUiState.Empty -> NoMoreProfilesCard()
                 is SwipeUiState.Error -> Text("Error: ${state.message}", color = error)
             }
@@ -293,7 +306,9 @@ private fun MatchesTab(
         } else {
             if (matchedUsers.isEmpty()) {
                 Box(
-                    Modifier.fillMaxWidth().padding(top = 48.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 48.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -302,7 +317,11 @@ private fun MatchesTab(
                             modifier = Modifier.size(64.dp), tint = primary.copy(0.3f)
                         )
                         Spacer(modifier = Modifier.height(Spacing.medium))
-                        Text("Aún no tienes matches", fontWeight = FontWeight.Bold, color = onSurfaceVariant)
+                        Text(
+                            "Aún no tienes matches",
+                            fontWeight = FontWeight.Bold,
+                            color = onSurfaceVariant
+                        )
                         Text("¡Sigue deslizando!", fontSize = 13.sp, color = onSurfaceVariant)
                     }
                 }
@@ -322,7 +341,8 @@ private fun MatchesTab(
                         MatchUserCard(
                             user = user,
                             onClick = {
-                                val chatId = listOf(viewModel.currentUserId, user.id).sorted().joinToString("_")
+                                val chatId = listOf(viewModel.currentUserId, user.id).sorted()
+                                    .joinToString("_")
                                 onNavigateToChatDetail(chatId)
                             },
                             onEnviarHola = {
@@ -349,13 +369,17 @@ private fun MatchUserCard(user: User, onClick: () -> Unit, onEnviarHola: () -> U
         Box(Modifier.fillMaxSize()) {
             // Fondo con Degradado
             Box(
-                Modifier.fillMaxSize().background(
-                    Brush.linearGradient(listOf(Color(0xFFFFE4F0), Color(0xFFFFD6EC)))
-                )
+                Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(listOf(Color(0xFFFFE4F0), Color(0xFFFFD6EC)))
+                    )
             ) {
                 Icon(
                     Icons.Default.Person, null,
-                    modifier = Modifier.size(60.dp).align(Alignment.Center),
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.Center),
                     tint = primary.copy(alpha = 0.4f)
                 )
             }
@@ -388,7 +412,10 @@ private fun MatchUserCard(user: User, onClick: () -> Unit, onEnviarHola: () -> U
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp) // Separación inferior antes del botón
+                    modifier = Modifier.padding(
+                        start = 4.dp,
+                        bottom = 8.dp
+                    ) // Separación inferior antes del botón
                 )
 
                 // 2. El Botón (ahora se posiciona automáticamente debajo)
@@ -476,7 +503,12 @@ private fun PreferencesPanel(
             IconButton(onClick = onClose) {
                 Icon(Icons.Default.Close, "Cerrar", tint = primary)
             }
-            Text("Preferencias", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = primary)
+            Text(
+                "Preferencias",
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 22.sp,
+                color = primary
+            )
         }
 
         Spacer(modifier = Modifier.height(Spacing.large))
@@ -489,9 +521,19 @@ private fun PreferencesPanel(
         ) {
             Column(modifier = Modifier.padding(Spacing.medium)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.People, null, tint = primary, modifier = Modifier.size(22.dp))
+                    Icon(
+                        Icons.Default.People,
+                        null,
+                        tint = primary,
+                        modifier = Modifier.size(22.dp)
+                    )
                     Spacer(modifier = Modifier.width(Spacing.small))
-                    Text("Rango de edad", fontSize = 15.sp, fontWeight = FontWeight.Medium, color = onBackground)
+                    Text(
+                        "Rango de edad",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = onBackground
+                    )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         "${ageRange.start.toInt()} - ${ageRange.endInclusive.toInt()} años",
@@ -524,12 +566,25 @@ private fun PreferencesPanel(
         ) {
             Column(modifier = Modifier.padding(Spacing.medium)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Palette, null, tint = primary, modifier = Modifier.size(22.dp))
+                    Icon(
+                        Icons.Default.Palette,
+                        null,
+                        tint = primary,
+                        modifier = Modifier.size(22.dp)
+                    )
                     Spacer(modifier = Modifier.width(Spacing.small))
-                    Text("Tema", fontSize = 15.sp, fontWeight = FontWeight.Medium, color = onBackground)
+                    Text(
+                        "Tema",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = onBackground
+                    )
                 }
                 Spacer(modifier = Modifier.height(Spacing.small))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.small)
+                ) {
                     listOf(
                         Triple("Claro", Icons.Default.LightMode, ThemePreference.LIGHT),
                         Triple("Oscuro", Icons.Default.DarkMode, ThemePreference.DARK),
@@ -542,11 +597,15 @@ private fun PreferencesPanel(
                             color = if (themePreference == pref) primary.copy(alpha = 0.12f) else Color.Transparent,
                             border = androidx.compose.foundation.BorderStroke(
                                 width = if (themePreference == pref) 2.dp else 1.dp,
-                                color = if (themePreference == pref) primary else onSurfaceVariant.copy(alpha = 0.3f)
+                                color = if (themePreference == pref) primary else onSurfaceVariant.copy(
+                                    alpha = 0.3f
+                                )
                             )
                         ) {
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 10.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
@@ -577,7 +636,9 @@ private fun PreferencesPanel(
             onClick = onNavigateToLegal
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.medium),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.Gavel, null, tint = primary, modifier = Modifier.size(22.dp))
@@ -586,7 +647,12 @@ private fun PreferencesPanel(
                     "Información Legal", fontSize = 15.sp, fontWeight = FontWeight.Medium,
                     color = onBackground, modifier = Modifier.weight(1f)
                 )
-                Icon(Icons.Default.ChevronRight, null, tint = onSurfaceVariant, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Default.ChevronRight,
+                    null,
+                    tint = onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
 
@@ -600,7 +666,9 @@ private fun PreferencesPanel(
             onClick = { showLogoutConfirm = true }
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.medium),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.Logout, null, tint = error, modifier = Modifier.size(22.dp))
@@ -609,7 +677,12 @@ private fun PreferencesPanel(
                     "Cerrar sesión", fontSize = 15.sp, fontWeight = FontWeight.Medium,
                     color = error, modifier = Modifier.weight(1f)
                 )
-                Icon(Icons.Default.ChevronRight, null, tint = error.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Default.ChevronRight,
+                    null,
+                    tint = error.copy(alpha = 0.5f),
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
 
@@ -736,9 +809,19 @@ private fun ProfileTab(
                     ) {
                         Column(modifier = Modifier.padding(Spacing.medium)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.FormatQuote, null, tint = primary, modifier = Modifier.size(20.dp))
+                                Icon(
+                                    Icons.Default.FormatQuote,
+                                    null,
+                                    tint = primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Sobre mí", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = primary)
+                                Text(
+                                    "Sobre mí",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = primary
+                                )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
@@ -762,9 +845,19 @@ private fun ProfileTab(
                     ) {
                         Column(modifier = Modifier.padding(Spacing.medium)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Tag, null, tint = primary, modifier = Modifier.size(20.dp))
+                                Icon(
+                                    Icons.Default.Tag,
+                                    null,
+                                    tint = primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Intereses", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = primary)
+                                Text(
+                                    "Intereses",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = primary
+                                )
                             }
                             Spacer(modifier = Modifier.height(Spacing.small))
                             FlowRow(
@@ -781,7 +874,10 @@ private fun ProfileTab(
                                     ) {
                                         Text(
                                             text = hobbyDisplayName(hobby),
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                            modifier = Modifier.padding(
+                                                horizontal = 12.dp,
+                                                vertical = 6.dp
+                                            ),
                                             fontSize = 13.sp,
                                             color = primary,
                                             fontWeight = FontWeight.Medium
@@ -804,9 +900,19 @@ private fun ProfileTab(
                     ) {
                         Column(modifier = Modifier.padding(Spacing.medium)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.PhotoLibrary, null, tint = primary, modifier = Modifier.size(20.dp))
+                                Icon(
+                                    Icons.Default.PhotoLibrary,
+                                    null,
+                                    tint = primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Galería", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = primary)
+                                Text(
+                                    "Galería",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = primary
+                                )
                             }
                             Spacer(modifier = Modifier.height(Spacing.small))
                             LazyVerticalGrid(
@@ -836,12 +942,22 @@ private fun ProfileTab(
             } else if (!isLoading && currentUser == null) {
                 // Sin perfil todavía
                 Box(
-                    Modifier.fillMaxWidth().padding(top = 32.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 32.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Completa tu perfil", fontWeight = FontWeight.Bold, color = onSurfaceVariant)
-                        Text("Añade tu info para que otros te conozcan", fontSize = 13.sp, color = onSurfaceVariant)
+                        Text(
+                            "Completa tu perfil",
+                            fontWeight = FontWeight.Bold,
+                            color = onSurfaceVariant
+                        )
+                        Text(
+                            "Añade tu info para que otros te conozcan",
+                            fontSize = 13.sp,
+                            color = onSurfaceVariant
+                        )
                     }
                 }
             }
@@ -902,7 +1018,12 @@ fun MatchDialog(
             ) {
                 Text("🔥", fontSize = 40.sp)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("¡Es un Match!", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = primary)
+                Text(
+                    "¡Es un Match!",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 22.sp,
+                    color = primary
+                )
             }
         },
         text = {
@@ -926,13 +1047,17 @@ fun ProfileCard(user: User, modifier: Modifier = Modifier) {
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Box(
-                modifier = Modifier.fillMaxSize().background(
-                    Brush.linearGradient(listOf(Color(0xFFFFE4F0), Color(0xFFFFD6EC)))
-                )
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(listOf(Color(0xFFFFE4F0), Color(0xFFFFD6EC)))
+                    )
             ) {
                 Icon(
                     Icons.Default.Person, null,
-                    modifier = Modifier.size(100.dp).align(Alignment.Center),
+                    modifier = Modifier
+                        .size(100.dp)
+                        .align(Alignment.Center),
                     tint = primary.copy(0.4f)
                 )
             }
@@ -947,24 +1072,47 @@ fun ProfileCard(user: User, modifier: Modifier = Modifier) {
             }
             Box(
                 modifier = Modifier
-                    .fillMaxWidth().fillMaxHeight(0.6f).align(Alignment.BottomCenter)
-                    .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.7f))))
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.6f)
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color.Black.copy(0.7f)
+                            )
+                        )
+                    )
             )
-            Column(modifier = Modifier.align(Alignment.BottomStart).padding(Spacing.large)) {
+            Column(modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(Spacing.large)) {
                 Text(
                     "${user.profile.name}, ${user.profile.age}",
                     color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold
                 )
-                Text(user.profile.bio, color = Color.White.copy(0.8f), fontSize = 14.sp, maxLines = 2)
+                Text(
+                    user.profile.bio,
+                    color = Color.White.copy(0.8f),
+                    fontSize = 14.sp,
+                    maxLines = 2
+                )
             }
         }
     }
 }
 
 @Composable
-fun SwipeActionButtons(onDislike: () -> Unit, onSuperLike: () -> Unit, onLike: () -> Unit, onBoost: () -> Unit) {
+fun SwipeActionButtons(
+    onDislike: () -> Unit,
+    onSuperLike: () -> Unit,
+    onLike: () -> Unit,
+    onBoost: () -> Unit
+) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.extraLarge),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.extraLarge),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         ActionButton(Icons.Default.Close, error, errorContainer, 60.dp, onDislike)
@@ -978,7 +1126,10 @@ fun SwipeActionButtons(onDislike: () -> Unit, onSuperLike: () -> Unit, onLike: (
 fun ActionButton(icon: ImageVector, tint: Color, background: Color, size: Dp, onClick: () -> Unit) {
     IconButton(onClick = onClick, modifier = Modifier.size(size)) {
         Box(
-            modifier = Modifier.fillMaxSize().shadow(6.dp, CircleShape).background(background, CircleShape),
+            modifier = Modifier
+                .fillMaxSize()
+                .shadow(6.dp, CircleShape)
+                .background(background, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(icon, null, tint = tint, modifier = Modifier.size(size * 0.45f))
@@ -1005,7 +1156,9 @@ private fun HomeTopBar(
     hasNewNotifications: Boolean = false
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium, vertical = Spacing.small),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.medium, vertical = Spacing.small),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1044,10 +1197,30 @@ private data class AppNotification(
 )
 
 private val sampleNotifications = listOf(
-    AppNotification("❤️", "¡Nuevo Match!", "Has hecho match con alguien. ¡Envíale un mensaje!", "Hace 2 min"),
-    AppNotification("💬", "Mensaje nuevo", "Tienes un mensaje sin leer en tus chats.", "Hace 15 min"),
-    AppNotification("⭐", "Super Like recibido", "Alguien te ha dado un Super Like. ¡Revísalo!", "Hace 1 h"),
-    AppNotification("🔥", "Completa tu perfil", "Los perfiles completos reciben 3x más matches.", "Hace 3 h"),
+    AppNotification(
+        "❤️",
+        "¡Nuevo Match!",
+        "Has hecho match con alguien. ¡Envíale un mensaje!",
+        "Hace 2 min"
+    ),
+    AppNotification(
+        "💬",
+        "Mensaje nuevo",
+        "Tienes un mensaje sin leer en tus chats.",
+        "Hace 15 min"
+    ),
+    AppNotification(
+        "⭐",
+        "Super Like recibido",
+        "Alguien te ha dado un Super Like. ¡Revísalo!",
+        "Hace 1 h"
+    ),
+    AppNotification(
+        "🔥",
+        "Completa tu perfil",
+        "Los perfiles completos reciben 3x más matches.",
+        "Hace 3 h"
+    ),
 )
 
 @Composable
@@ -1102,7 +1275,11 @@ private fun NotificationItem(notif: AppNotification) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color(0xFFFFF0F7)),
+        colors = CardDefaults.cardColors(
+            containerColor = androidx.compose.ui.graphics.Color(
+                0xFFFFF0F7
+            )
+        ),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Row(
@@ -1112,7 +1289,12 @@ private fun NotificationItem(notif: AppNotification) {
             Text(notif.icon, fontSize = 26.sp)
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(notif.title, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = onBackground)
+                Text(
+                    notif.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = onBackground
+                )
                 Text(notif.body, fontSize = 12.sp, color = onSurfaceVariant, lineHeight = 17.sp)
             }
             Spacer(modifier = Modifier.width(8.dp))

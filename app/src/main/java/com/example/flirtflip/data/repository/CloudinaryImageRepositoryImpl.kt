@@ -3,6 +3,7 @@ package com.example.flirtflip.data.repository
 import android.content.Context
 import android.util.Log
 import androidx.core.net.toUri
+import com.example.flirtflip.BuildConfig
 import com.example.flirtflip.domain.repository.ImageRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,9 +20,9 @@ class CloudinaryImageRepositoryImpl @Inject constructor(
 ) : ImageRepository {
 
     companion object {
-        private const val CLOUD_NAME = "dw7x9xfgg"
-        private const val UPLOAD_PRESET = "flirtflip_preset"
-        private const val UPLOAD_URL = "https://api.cloudinary.com/v1_1/$CLOUD_NAME/image/upload"
+        private const val CLOUD_NAME = BuildConfig.CLOUDINARY_CLOUD_NAME
+        private const val UPLOAD_PRESET = BuildConfig.CLOUDINARY_UPLOAD_PRESET
+        private val UPLOAD_URL get() = "https://api.cloudinary.com/v1_1/$CLOUD_NAME/image/upload"
     }
 
     override suspend fun uploadUserImage(
